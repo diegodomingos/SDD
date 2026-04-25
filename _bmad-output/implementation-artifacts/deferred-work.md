@@ -19,3 +19,16 @@
 - `electronApp.setAppUserModelId('com.electron')` does not match `appId` (`sdd-app/src/main/index.ts`) — fix alongside appId in Story 6.6
 - `maintainer: electronjs.org` in Linux build config (`sdd-app/electron-builder.yml`) — update before distribution
 - `!src/*` files exclusion in `electron-builder.yml` may not be recursive (`sdd-app/electron-builder.yml`) — low risk; compiled output in `out/`; verify during Story 6.6 packaging
+
+## Deferred from: code review of 1-2-define-ipc-contract-and-shared-types (2026-04-25)
+
+- Weak IPC invoke signature — `invoke<T>(channel: string, payload?: unknown)` has no channel union or payload-to-return mapping; Story 1.5 should define typed overloads or a channel map
+- `IpcResult<T>` error carries only `string` — no error code field; renderer cannot programmatically branch on error category without fragile string parsing
+- Empty string accepted by `name`/`description`/`key` fields — no branded type enforcement; repository layer must validate before DB writes
+- `competencyIds` accepts empty array in create/update payloads — a log entry with zero competencies is semantically invalid; repository layer must reject
+- Date fields (`entryDate`, `createdAt`) are unvalidated plain `string` — ISO 8601 is comment-only; repository layer must validate format
+- `SetModelPayload.model` is `string` not a union — valid model IDs listed in comment only; tighten to union type in a future cleanup
+- Update payloads require all fields — no `Partial<>` variants; callers must re-supply all unchanged fields; consider partial-update variants when API evolves
+- `BehaviorLogEntry.competencies` can be empty array — repository layer should ensure entries always carry at least one competency or document the zero-competency case
+- `CompetencyLevel` values opaque — no documentation of level ordering (`'A'` through `'D'`); add to architecture doc or a future competency reference
+- No IPC schema versioning strategy — if main and renderer get out of sync during an update cycle, type mismatches will be silent at runtime; address before v1.0
