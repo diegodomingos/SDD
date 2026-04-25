@@ -32,3 +32,12 @@
 - `BehaviorLogEntry.competencies` can be empty array — repository layer should ensure entries always carry at least one competency or document the zero-competency case
 - `CompetencyLevel` values opaque — no documentation of level ordering (`'A'` through `'D'`); add to architecture doc or a future competency reference
 - No IPC schema versioning strategy — if main and renderer get out of sync during an update cycle, type mismatches will be silent at runtime; address before v1.0
+
+## Deferred from: code review of 1-3-initialize-sqlite-database-with-schema-on-startup (2026-04-25)
+
+- No schema migration strategy — `IF NOT EXISTS` silently skips future column additions; no migration version table or runner; address before any schema change story
+- `db` exported as mutable singleton — any module can execute arbitrary SQL bypassing future transaction discipline; consider a repository pattern wrapper in Epic 2+
+- `entry_date TEXT NOT NULL` accepts empty string — no CHECK constraint enforcing ISO-8601 format; date range queries may silently produce wrong results
+- `competency_id` FK in `behavior_log_entry_competencies` has no explicit `ON DELETE` action — implicit RESTRICT will raise cryptic FK error for callers deleting competencies
+- `created_at DEFAULT (datetime('now'))` stores UTC without timezone marker — ambiguous vs local time in UI display; address before cross-timezone use
+- No SQLite `STRICT` table mode — type affinity coercion can silently store wrong types (e.g., integer stored in TEXT column)

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-04-25 # story 1-2 done after code review
+last_updated: 2026-04-25 # story 1-3 done after code review
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -46,7 +46,7 @@ development_status:
   epic-1: in-progress
   1-1-scaffold-and-configure-project: done
   1-2-define-ipc-contract-and-shared-types: done
-  1-3-initialize-sqlite-database-with-schema-on-startup: backlog
+  1-3-initialize-sqlite-database-with-schema-on-startup: done
   1-4-define-aiprovider-interface-and-implement-mockaiprovider: backlog
   1-5-wire-contextbridge-preload-and-ipc-handler-scaffold: backlog
   1-6-mui-theme-and-app-shell: backlog
