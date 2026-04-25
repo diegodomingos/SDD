@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Evaluation Tool — UX Mockups</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #111827;
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  .nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .nav-btn {
+    padding: 8px 16px;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    background: #1F2937;
+    color: #9CA3AF;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .nav-btn.active { background: #3B5BDB; color: white; border-color: #3B5BDB; }
+  .nav-btn:hover:not(.active) { background: #374151; color: #F9FAFB; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .screen-label {
+    font-size: 12px;
+    color: #6B7280;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+  }
+  .screen-label-badge {
+    background: #1E3A8A;
+    color: #93C5FD;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* ── APP SHELL ── */
+  .app-shell {
+    display: flex;
+    width: 1200px;
+    height: 720px;
+    background: #F5F7FA;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.4);
+    border: 1px solid #374151;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 200px;
+    background: #FFFFFF;
+    border-right: 1px solid #E5E7EB;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 18px 16px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #3B5BDB;
+    border-bottom: 1px solid #E5E7EB;
+    letter-spacing: 0.1px;
+    line-height: 1.4;
+  }
+  .sidebar-logo span {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: #9CA3AF;
+    margin-top: 3px;
+  }
+  .sidebar-nav { padding: 8px 0; flex: 1; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #6B7280;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.1s;
+  }
+  .nav-item:hover { background: #F9FAFB; color: #1A1A2E; }
+  .nav-item.active {
+    background: #EEF2FF;
+    color: #3B5BDB;
+    font-weight: 500;
+    border-left-color: #3B5BDB;
+  }
+  .nav-icon { width: 18px; text-align: center; font-size: 15px; }
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 11px;
+    color: #9CA3AF;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title { font-size: 20px; font-weight: 600; color: #1A1A2E; }
+  .breadcrumb { font-size: 13px; color: #9CA3AF; margin-bottom: 6px; }
+  .breadcrumb a { color: #3B5BDB; cursor: pointer; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    background: #3B5BDB; color: white; border: none;
+    padding: 8px 16px; border-radius: 6px; font-size: 14px;
+    font-weight: 500; cursor: pointer; display: inline-flex;
+    align-items: center; gap: 6px; font-family: inherit;
+  }
+  .btn-primary:hover { background: #3451C7; }
+  .btn-secondary {
+    background: white; color: #3B5BDB;
+    border: 1px solid #3B5BDB; padding: 8px 16px;
+    border-radius: 6px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+  }
+
+  /* ── TABLE ── */
+  .table-container {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    overflow: hidden;
+  }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9CA3AF;
+    background: #F9FAFB;
+    border-bottom: 1px solid #E5E7EB;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .table td {
+    padding: 0 16px;
+    height: 52px;
+    font-size: 14px;
+    color: #1A1A2E;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: middle;
+  }
+  .table tr:last-child td { border-bottom: none; }
+  .table tbody tr:hover td { background: #FAFBFF; }
+  .table tr.editing td { background: #F0F4FF; border-bottom: 1px solid #C7D2FE; }
+  .table tr.editing:hover td { background: #F0F4FF; }
+
+  /* ── CHIPS (read-only) ── */
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: 2px 10px; border-radius: 12px;
+    font-size: 12px; font-weight: 500; border: 1px solid;
+    margin-right: 4px; white-space: nowrap;
+  }
+  .chip-communication { color: #2563EB; border-color: #93C5FD; background: #EFF6FF; }
+  .chip-client        { color: #0D9488; border-color: #5EEAD4; background: #F0FDFA; }
+  .chip-proactivity   { color: #D97706; border-color: #FCD34D; background: #FFFBEB; }
+  .chip-teamwork      { color: #7C3AED; border-color: #C4B5FD; background: #F5F3FF; }
+
+  /* ── CHIP TOGGLES (editable) ── */
+  .chip-toggle {
+    display: inline-flex; align-items: center;
+    padding: 4px 12px; border-radius: 16px;
+    font-size: 12px; font-weight: 500; border: 1.5px solid;
+    margin-right: 4px; cursor: pointer;
+    opacity: 0.35; transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .chip-toggle.selected { opacity: 1; }
+  .chip-toggle-communication { color: #2563EB; border-color: #93C5FD; background: #EFF6FF; }
+  .chip-toggle-client        { color: #0D9488; border-color: #5EEAD4; background: #F0FDFA; }
+  .chip-toggle-proactivity   { color: #D97706; border-color: #FCD34D; background: #FFFBEB; }
+  .chip-toggle-teamwork      { color: #7C3AED; border-color: #C4B5FD; background: #F5F3FF; }
+
+  /* ── LEVEL BADGE ── */
+  .level-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 6px;
+    font-size: 13px; font-weight: 600;
+    background: #EEF2FF; color: #3B5BDB;
+  }
+
+  /* ── GRADE BADGES ── */
+  .grade-exceeds    { color: #166534; background: #DCFCE7; border: 1px solid #86EFAC; padding: 5px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+  .grade-meets      { color: #1E40AF; background: #DBEAFE; border: 1px solid #93C5FD; padding: 5px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+  .grade-not-meet   { color: #991B1B; background: #FEE2E2; border: 1px solid #FCA5A5; padding: 5px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+  .grade-insufficient { color: #92400E; background: #FEF3C7; border: 1px solid #FCD34D; padding: 5px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+
+  /* ── INLINE EDIT ── */
+  .inline-input {
+    border: 1.5px solid #3B5BDB; border-radius: 4px;
+    padding: 6px 8px; font-size: 14px; font-family: inherit;
+    color: #1A1A2E; background: white; width: 100%; outline: none;
+    box-shadow: 0 0 0 3px rgba(59,91,219,0.12);
+  }
+  .date-input {
+    width: 128px; border: 1.5px solid #3B5BDB; border-radius: 4px;
+    padding: 6px 8px; font-size: 14px; font-family: inherit;
+    color: #1A1A2E; background: white; outline: none;
+  }
+
+  /* ── ROW ACTIONS ── */
+  .action-save {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #DCFCE7; color: #166534;
+    border: 1px solid #86EFAC; cursor: pointer;
+    font-size: 15px; display: inline-flex;
+    align-items: center; justify-content: center; margin-right: 4px;
+  }
+  .action-cancel {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #FEE2E2; color: #991B1B;
+    border: 1px solid #FCA5A5; cursor: pointer;
+    font-size: 15px; display: inline-flex;
+    align-items: center; justify-content: center;
+  }
+  .row-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .table tbody tr:hover .row-actions { opacity: 1; }
+  .action-icon {
+    width: 30px; height: 30px; border-radius: 4px;
+    border: 1px solid #E5E7EB; background: white;
+    color: #6B7280; cursor: pointer; font-size: 13px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .action-icon:hover { border-color: #3B5BDB; color: #3B5BDB; }
+
+  /* ── EMPLOYEE HEADER ── */
+  .employee-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .employee-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #EEF2FF; color: #3B5BDB;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; flex-shrink: 0;
+  }
+  .employee-info-name { font-size: 20px; font-weight: 600; color: #1A1A2E; }
+  .employee-info-meta { font-size: 13px; color: #6B7280; margin-top: 2px; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #E5E7EB;
+    margin-bottom: 20px;
+  }
+  .tab {
+    padding: 10px 20px; font-size: 14px; font-weight: 500;
+    color: #6B7280; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab.active { color: #3B5BDB; border-bottom-color: #3B5BDB; }
+
+  /* ── FILTER CHIPS (evaluate tab) ── */
+  .filter-row {
+    display: flex; gap: 8px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 13px; color: #6B7280; white-space: nowrap; }
+  .filter-chip {
+    padding: 5px 14px; border-radius: 16px;
+    font-size: 13px; font-weight: 500; border: 1.5px solid; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-chip-communication       { color: #2563EB; border-color: #93C5FD; background: white; }
+  .filter-chip-communication.active { background: #EFF6FF; }
+  .filter-chip-client               { color: #0D9488; border-color: #5EEAD4; background: white; }
+  .filter-chip-client.active        { background: #F0FDFA; }
+  .filter-chip-proactivity          { color: #D97706; border-color: #FCD34D; background: white; }
+  .filter-chip-proactivity.active   { background: #FFFBEB; font-weight: 600; }
+  .filter-chip-teamwork             { color: #7C3AED; border-color: #C4B5FD; background: white; }
+  .filter-chip-teamwork.active      { background: #F5F3FF; font-weight: 600; }
+
+  /* ── SELECT PROMPT ── */
+  .select-prompt {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 56px 24px; color: #9CA3AF; text-align: center;
+    background: white; border-radius: 8px; border: 1.5px dashed #E5E7EB;
+  }
+  .select-prompt-icon { font-size: 32px; margin-bottom: 12px; }
+  .select-prompt-title { font-size: 15px; font-weight: 500; color: #6B7280; margin-bottom: 6px; }
+  .select-prompt-sub { font-size: 13px; color: #9CA3AF; }
+
+  /* ── AI RESULT CARD ── */
+  .ai-result-card {
+    background: white; border-radius: 8px;
+    border: 1px solid #E5E7EB; padding: 20px 24px; margin-top: 20px;
+  }
+  .ai-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.7px; color: #9CA3AF; margin-bottom: 10px;
+  }
+  .ai-rationale {
+    font-size: 14px; color: #374151; line-height: 1.65;
+    background: #F9FAFB; border-left: 3px solid #C7D2FE;
+    padding: 12px 16px; border-radius: 0 4px 4px 0;
+    margin-top: 14px;
+  }
+
+  /* ── EVALUATE ACTION ROW ── */
+  .eval-action-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 20px; padding: 16px 20px;
+    background: white; border-radius: 8px; border: 1px solid #E5E7EB;
+  }
+  .eval-action-label { font-size: 14px; color: #374151; }
+  .eval-action-label span { font-weight: 600; color: #1A1A2E; }
+
+  /* ── INSUFFICIENT INPUT ── */
+  .insufficient-card {
+    background: #FFFBEB; border-radius: 8px;
+    border: 1px solid #FCD34D; padding: 20px 24px; margin-top: 20px;
+  }
+  .insufficient-title {
+    font-size: 15px; font-weight: 600; color: #92400E;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .insufficient-message {
+    font-size: 14px; color: #78350F; line-height: 1.65; margin-bottom: 14px;
+  }
+  .insufficient-cta {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px; color: #B45309; font-weight: 500;
+  }
+
+  /* ── FRAMEWORK ── */
+  .framework-section {
+    background: white; border-radius: 8px;
+    border: 1px solid #E5E7EB; margin-bottom: 12px; overflow: hidden;
+  }
+  .framework-header {
+    padding: 14px 20px; display: flex; align-items: center;
+    justify-content: space-between; border-bottom: 1px solid #E5E7EB;
+    background: #F9FAFB;
+  }
+  .framework-body { padding: 16px 20px; }
+  .level-row {
+    display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start;
+  }
+  .level-row:last-child { margin-bottom: 0; }
+  .level-label {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 6px;
+    background: #EEF2FF; color: #3B5BDB; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .level-text { flex: 1; font-size: 14px; color: #374151; line-height: 1.55; }
+  .level-edit-btn {
+    flex-shrink: 0; padding: 4px 12px; border: 1px solid #E5E7EB;
+    border-radius: 4px; background: white; color: #6B7280;
+    font-size: 12px; cursor: pointer; font-family: inherit; margin-top: 2px;
+  }
+  .level-edit-btn:hover { border-color: #3B5BDB; color: #3B5BDB; }
+  .level-edit-btn.saving { border-color: #3B5BDB; color: #3B5BDB; font-weight: 500; }
+
+  .desc-cell {
+    max-width: 360px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div style="margin-bottom: 20px;">
+  <div style="font-size: 12px; color: #6B7280; margin-bottom: 10px; letter-spacing: 0.3px;">
+    EMPLOYEE EVALUATION TOOL — UX MOCKUPS
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="show('s1',this)">1 · Employee List</button>
+    <button class="nav-btn"        onclick="show('s2',this)">2 · Behavior Log</button>
+    <button class="nav-btn"        onclick="show('s3',this)">3 · Inline Log Entry</button>
+    <button class="nav-btn"        onclick="show('s4',this)">4 · Evaluate — Select</button>
+    <button class="nav-btn"        onclick="show('s5',this)">5 · Evaluate — Grade Result</button>
+    <button class="nav-btn"        onclick="show('s6',this)">6 · Evaluate — Insufficient Input</button>
+    <button class="nav-btn"        onclick="show('s7',this)">7 · Framework Setup</button>
+    <button class="nav-btn"        onclick="show('s8',this)">8 · Settings</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 1: Employee List -->
+<!-- ============================================================ -->
+<div id="s1" class="screen active">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 1</span>
+    Employee List — main landing screen.
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item active"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-title">Employees</div>
+        <button class="btn-primary">+ Add Employee</button>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th style="width:80px;">Level</th>
+              <th style="width:160px;">Last Entry</th>
+              <th style="width:120px;">Log Entries</th>
+              <th style="width:60px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="cursor:pointer">
+              <td style="font-weight:500;">Sofia Mendes</td>
+              <td><span class="level-badge">B</span></td>
+              <td style="color:#6B7280;font-size:13px;">Apr 22, 2026</td>
+              <td style="color:#6B7280;font-size:13px;">13 entries</td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr style="cursor:pointer">
+              <td style="font-weight:500;">João Ferreira</td>
+              <td><span class="level-badge">C</span></td>
+              <td style="color:#6B7280;font-size:13px;">Mar 28, 2026</td>
+              <td style="color:#6B7280;font-size:13px;">8 entries</td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr style="cursor:pointer">
+              <td style="font-weight:500;">Ana Costa</td>
+              <td><span class="level-badge">A</span></td>
+              <td style="color:#6B7280;font-size:13px;">Apr 10, 2026</td>
+              <td style="color:#6B7280;font-size:13px;">6 entries</td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr style="cursor:pointer">
+              <td style="font-weight:500;">Ricardo Santos</td>
+              <td><span class="level-badge">D</span></td>
+              <td style="color:#6B7280;font-size:13px;">Feb 5, 2026</td>
+              <td style="color:#6B7280;font-size:13px;">3 entries</td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr style="cursor:pointer">
+              <td style="font-weight:500;">Mariana Lima</td>
+              <td><span class="level-badge">B</span></td>
+              <td style="color:#6B7280;font-size:13px;">Apr 18, 2026</td>
+              <td style="color:#6B7280;font-size:13px;">15 entries</td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 2: Behavior Log (normal state) -->
+<!-- ============================================================ -->
+<div id="s2" class="screen">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 2</span>
+    Behavior Log — Sofia Mendes. Normal read state before clicking "Log Behavior".
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item active"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="breadcrumb"><a>Employees</a> › Sofia Mendes</div>
+      <div class="employee-header">
+        <div class="employee-avatar">SM</div>
+        <div>
+          <div class="employee-info-name">Sofia Mendes</div>
+          <div class="employee-info-meta">Level <strong>B</strong> · 12 behavior entries</div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active">Behavior Log</div>
+        <div class="tab">Evaluate</div>
+      </div>
+      <div class="page-header" style="margin-bottom:16px;">
+        <div style="font-size:13px;color:#6B7280;">12 entries · all competencies</div>
+        <button class="btn-primary">+ Log Behavior</button>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:130px;">Date</th>
+              <th>Description</th>
+              <th style="width:220px;">Competencies</th>
+              <th style="width:64px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Apr 14, 2026</td>
+              <td class="desc-cell">Proactively helped resolve client issue outside her direct responsibility, reducing escalation risk.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span><span class="chip chip-client">Client Focus</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Mar 22, 2026</td>
+              <td class="desc-cell">Prepared meeting agenda without being asked and distributed it to all participants in advance.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Mar 5, 2026</td>
+              <td class="desc-cell">Explained a complex technical process to a non-technical client using clear, accessible language.</td>
+              <td><span class="chip chip-communication">Communication</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Feb 18, 2026</td>
+              <td class="desc-cell">Volunteered to onboard a new team member, sharing knowledge proactively without being asked.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span><span class="chip chip-teamwork">Teamwork</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Jan 30, 2026</td>
+              <td class="desc-cell">Followed up with client after a difficult call to ensure satisfaction, without being prompted.</td>
+              <td><span class="chip chip-client">Client Focus</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 3: Inline Log Entry -->
+<!-- ============================================================ -->
+<div id="s3" class="screen">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 3</span>
+    Inline Log Entry — new editable row inserted at top. ✓ saves, ✕ cancels. Enter = line break.
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item active"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="breadcrumb"><a>Employees</a> › Sofia Mendes</div>
+      <div class="employee-header">
+        <div class="employee-avatar">SM</div>
+        <div>
+          <div class="employee-info-name">Sofia Mendes</div>
+          <div class="employee-info-meta">Level <strong>B</strong> · 12 behavior entries</div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active">Behavior Log</div>
+        <div class="tab">Evaluate</div>
+      </div>
+      <div class="page-header" style="margin-bottom:16px;">
+        <div style="font-size:13px;color:#6B7280;">12 entries · all competencies</div>
+        <button class="btn-primary" style="opacity:0.4;cursor:default;">+ Log Behavior</button>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:148px;">Date</th>
+              <th>Description</th>
+              <th style="width:280px;">Competencies</th>
+              <th style="width:80px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="editing">
+              <td style="vertical-align:top;padding-top:10px;">
+                <input type="text" class="date-input" value="Apr 22, 2026">
+              </td>
+              <td>
+                <textarea class="inline-input" rows="2" style="resize:none;width:100%;">Stepped in to coordinate with client support during an urgent issue, preventing escalation.</textarea>
+              </td>
+              <td style="vertical-align:middle;">
+                <span class="chip-toggle chip-toggle-communication">Communication</span>
+                <span class="chip-toggle chip-toggle-client selected">Client Focus</span>
+                <span class="chip-toggle chip-toggle-proactivity selected">Proactivity</span>
+                <span class="chip-toggle chip-toggle-teamwork">Teamwork</span>
+              </td>
+              <td style="vertical-align:middle;">
+                <button class="action-save">✓</button>
+                <button class="action-cancel">✕</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Apr 14, 2026</td>
+              <td class="desc-cell">Proactively helped resolve client issue outside her direct responsibility, reducing escalation risk.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span><span class="chip chip-client">Client Focus</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Mar 22, 2026</td>
+              <td class="desc-cell">Prepared meeting agenda without being asked and distributed it to all participants in advance.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;white-space:nowrap;">Mar 5, 2026</td>
+              <td class="desc-cell">Explained a complex technical process to a non-technical client using clear, accessible language.</td>
+              <td><span class="chip chip-communication">Communication</span></td>
+              <td><div class="row-actions"><button class="action-icon">✏️</button><button class="action-icon">🗑️</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 4: Evaluate — No competency selected -->
+<!-- ============================================================ -->
+<div id="s4" class="screen">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 4</span>
+    Evaluate tab — initial state. No competency selected. User must select one to proceed.
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item active"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="breadcrumb"><a>Employees</a> › Sofia Mendes</div>
+      <div class="employee-header">
+        <div class="employee-avatar">SM</div>
+        <div>
+          <div class="employee-info-name">Sofia Mendes</div>
+          <div class="employee-info-meta">Level <strong>B</strong> · 13 behavior entries</div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab">Behavior Log</div>
+        <div class="tab active">Evaluate</div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Select a competency to evaluate:</span>
+        <span class="filter-chip filter-chip-communication">Communication</span>
+        <span class="filter-chip filter-chip-client">Client Focus</span>
+        <span class="filter-chip filter-chip-proactivity">Proactivity</span>
+        <span class="filter-chip filter-chip-teamwork">Teamwork</span>
+      </div>
+      <div class="select-prompt">
+        <div class="select-prompt-icon">📊</div>
+        <div class="select-prompt-title">Select a competency above to begin</div>
+        <div class="select-prompt-sub">The relevant behavior entries will be shown, then you can run the AI assessment.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 5: Evaluate — Grade Result (after Run) -->
+<!-- ============================================================ -->
+<div id="s5" class="screen">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 5</span>
+    Evaluate tab — Proactivity selected, entries filtered, "Run Evaluation" clicked → grade result shown.
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item active"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="breadcrumb"><a>Employees</a> › Sofia Mendes</div>
+      <div class="employee-header">
+        <div class="employee-avatar">SM</div>
+        <div>
+          <div class="employee-info-name">Sofia Mendes</div>
+          <div class="employee-info-meta">Level <strong>B</strong> · 13 behavior entries</div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab">Behavior Log</div>
+        <div class="tab active">Evaluate</div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Select a competency to evaluate:</span>
+        <span class="filter-chip filter-chip-communication">Communication</span>
+        <span class="filter-chip filter-chip-client">Client Focus</span>
+        <span class="filter-chip filter-chip-proactivity active">Proactivity</span>
+        <span class="filter-chip filter-chip-teamwork">Teamwork</span>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:130px;">Date</th>
+              <th>Description</th>
+              <th style="width:140px;">Competencies</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;">Apr 22, 2026</td>
+              <td class="desc-cell">Stepped in to coordinate with client support during an urgent issue, preventing escalation.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;">Apr 14, 2026</td>
+              <td class="desc-cell">Proactively helped resolve client issue outside her direct responsibility, reducing escalation risk.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;">Mar 22, 2026</td>
+              <td class="desc-cell">Prepared meeting agenda without being asked and distributed it to all participants in advance.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;">Feb 18, 2026</td>
+              <td class="desc-cell">Volunteered to onboard a new team member, sharing knowledge proactively without being asked.</td>
+              <td><span class="chip chip-proactivity">Proactivity</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ai-result-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div>
+            <div class="ai-label">AI Assessment · Proactivity · Level B</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span class="grade-meets">Meets Expectations</span>
+              <span style="font-size:13px;color:#6B7280;">Based on 4 log entries</span>
+            </div>
+          </div>
+          <button class="btn-secondary" style="font-size:13px;">↺ Re-run Evaluation</button>
+        </div>
+        <div class="ai-rationale">
+          Sofia's logged behaviors consistently demonstrate initiative within her role at Level B. Three entries show unprompted action to prevent client escalations or reduce risk. One entry reflects proactive knowledge sharing with a new team member. No logged behaviors contradict the expected standard for Level B Proactivity. Evidence base is sufficient to support this grade.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 6: Evaluate — Insufficient Input -->
+<!-- ============================================================ -->
+<div id="s6" class="screen">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 6</span>
+    Evaluate tab — Teamwork selected for João Ferreira. "Run Evaluation" clicked → Insufficient Input result.
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item active"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="breadcrumb"><a>Employees</a> › João Ferreira</div>
+      <div class="employee-header">
+        <div class="employee-avatar" style="background:#F3F4F6;color:#374151;">JF</div>
+        <div>
+          <div class="employee-info-name">João Ferreira</div>
+          <div class="employee-info-meta">Level <strong>C</strong> · 8 behavior entries</div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab">Behavior Log</div>
+        <div class="tab active">Evaluate</div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Select a competency to evaluate:</span>
+        <span class="filter-chip filter-chip-communication">Communication</span>
+        <span class="filter-chip filter-chip-client">Client Focus</span>
+        <span class="filter-chip filter-chip-proactivity">Proactivity</span>
+        <span class="filter-chip filter-chip-teamwork active">Teamwork</span>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:130px;">Date</th>
+              <th>Description</th>
+              <th style="width:140px;">Competencies</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;">Jan 15, 2026</td>
+              <td class="desc-cell">Participated in team retrospective and shared feedback constructively.</td>
+              <td><span class="chip chip-teamwork">Teamwork</span></td>
+            </tr>
+            <tr>
+              <td style="color:#6B7280;font-size:13px;">Jan 8, 2026</td>
+              <td class="desc-cell">Helped a colleague debug an issue during a tight deadline period.</td>
+              <td><span class="chip chip-teamwork">Teamwork</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="insufficient-card">
+        <div class="insufficient-title">⚠ Insufficient Input</div>
+        <div class="insufficient-message">
+          Only 2 behavioral entries are tagged to Teamwork, both from a single period (January 2026). The evidence base is too sparse to support a reliable comparison against the expected behaviors for Level C. A grade cannot be assigned with this level of evidence.
+        </div>
+        <div class="insufficient-cta">
+          → Add more Teamwork observations to unlock an assessment
+          <button class="btn-primary" style="font-size:13px;padding:6px 14px;">+ Log Behavior</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 7: Framework Setup -->
+<!-- ============================================================ -->
+<div id="s7" class="screen">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 7</span>
+    Framework Setup — expected behaviors per competency and level. Level B Proactivity shown in edit mode.
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item active"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-title">Competency Framework</div>
+      </div>
+      <div style="font-size:14px;color:#6B7280;margin-bottom:24px;margin-top:-16px;">
+        Define the expected observable behaviors per competency and level. These are the standards used by the AI to assess employees.
+      </div>
+      <div class="framework-section">
+        <div class="framework-header">
+          <div style="font-size:15px;font-weight:600;color:#1A1A2E;display:flex;align-items:center;gap:10px;">
+            <span class="chip chip-proactivity" style="margin:0;">Proactivity</span>
+          </div>
+          <span style="font-size:12px;color:#6B7280;">4 levels configured</span>
+        </div>
+        <div class="framework-body">
+          <div class="level-row">
+            <div class="level-label">A</div>
+            <div class="level-text">Identifies and acts on opportunities within their immediate tasks without prompting. Flags blockers early before they escalate.</div>
+            <button class="level-edit-btn">Edit</button>
+          </div>
+          <div class="level-row" style="background:#F0F4FF;margin:0 -4px;padding:8px 4px;border-radius:6px;">
+            <div class="level-label">B</div>
+            <div class="level-text">
+              <textarea class="inline-input" rows="2" style="resize:none;">Takes initiative beyond assigned tasks. Anticipates team needs and acts before being asked. Suggests process improvements.</textarea>
+            </div>
+            <button class="level-edit-btn saving">Save</button>
+          </div>
+          <div class="level-row" style="margin-top:8px;">
+            <div class="level-label">C</div>
+            <div class="level-text">Drives improvements at a team or project level. Identifies strategic risks and opportunities proactively. Influences peers.</div>
+            <button class="level-edit-btn">Edit</button>
+          </div>
+          <div class="level-row">
+            <div class="level-label">D</div>
+            <div class="level-text">Shapes organizational direction. Proactively engages across departments to prevent issues and create opportunities at scale.</div>
+            <button class="level-edit-btn">Edit</button>
+          </div>
+        </div>
+      </div>
+      <div class="framework-section">
+        <div class="framework-header">
+          <div style="font-size:15px;font-weight:600;color:#1A1A2E;display:flex;align-items:center;gap:10px;">
+            <span class="chip chip-client" style="margin:0;">Client Focus</span>
+          </div>
+          <span style="font-size:12px;color:#6B7280;">4 levels configured</span>
+        </div>
+        <div class="framework-body">
+          <div class="level-row">
+            <div class="level-label">A</div>
+            <div class="level-text">Responds to client requests promptly and professionally. Escalates issues to the right person without delay.</div>
+            <button class="level-edit-btn">Edit</button>
+          </div>
+          <div class="level-row">
+            <div class="level-label">B</div>
+            <div class="level-text">Anticipates client needs and follows up proactively. Maintains relationship quality beyond transactional interactions.</div>
+            <button class="level-edit-btn">Edit</button>
+          </div>
+          <div class="level-row">
+            <div class="level-label">C</div>
+            <div class="level-text">Builds long-term client partnerships. Proactively identifies client risks and addresses them before they surface.</div>
+            <button class="level-edit-btn">Edit</button>
+          </div>
+          <div class="level-row">
+            <div class="level-label">D</div>
+            <div class="level-text">Shapes client strategy at a senior level. Acts as a trusted advisor; clients seek their input on strategic decisions.</div>
+            <button class="level-edit-btn">Edit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 8: Settings -->
+<!-- ============================================================ -->
+<div id="s8" class="screen">
+  <div class="screen-label">
+    <span class="screen-label-badge">Screen 8</span>
+    Settings — manager name, Claude API key, model selector, and data management.
+  </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">Employee Evaluation Tool<span>Marco Silva</span></div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="nav-icon">👥</span> Employees</div>
+        <div class="nav-item"><span class="nav-icon">📋</span> Framework</div>
+        <div class="nav-item active"><span class="nav-icon">⚙️</span> Settings</div>
+      </div>
+      <div class="sidebar-footer">v1.0.0 · PoC</div>
+    </div>
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-title">Settings</div>
+      </div>
+
+      <!-- General section -->
+      <div style="background:white;border-radius:8px;border:1px solid #E5E7EB;margin-bottom:16px;overflow:hidden;">
+        <div style="padding:14px 20px;border-bottom:1px solid #E5E7EB;background:#F9FAFB;">
+          <div style="font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.6px;">General</div>
+        </div>
+        <div style="padding:20px 24px;">
+          <div style="margin-bottom:20px;">
+            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Manager display name</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input type="text" value="Marco Silva"
+                style="width:280px;border:1px solid #D1D5DB;border-radius:6px;padding:8px 12px;font-size:14px;font-family:inherit;color:#1A1A2E;outline:none;">
+              <button class="btn-primary" style="padding:8px 16px;font-size:13px;">Save</button>
+            </div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:6px;">Displayed in the sidebar throughout the application.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Configuration section -->
+      <div style="background:white;border-radius:8px;border:1px solid #E5E7EB;margin-bottom:16px;overflow:hidden;">
+        <div style="padding:14px 20px;border-bottom:1px solid #E5E7EB;background:#F9FAFB;">
+          <div style="font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.6px;">AI Configuration</div>
+        </div>
+        <div style="padding:20px 24px;">
+
+          <!-- API Key -->
+          <div style="margin-bottom:24px;">
+            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Claude API key</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div style="position:relative;width:380px;">
+                <input type="password" value="sk-ant-api03-••••••••••••••••••••••••••••••••••••"
+                  style="width:100%;border:1px solid #D1D5DB;border-radius:6px;padding:8px 40px 8px 12px;font-size:14px;font-family:inherit;color:#1A1A2E;outline:none;letter-spacing:0.08em;">
+                <button style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6B7280;font-size:14px;" title="Show/hide">👁</button>
+              </div>
+              <button class="btn-primary" style="padding:8px 16px;font-size:13px;">Save</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+              <span style="font-size:12px;color:#059669;font-weight:500;">🔒 Stored securely</span>
+              <span style="font-size:12px;color:#9CA3AF;">· Encrypted by the operating system. Never stored in plain text.</span>
+            </div>
+          </div>
+
+          <!-- Model selector -->
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Claude model</label>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div>
+                <select style="width:280px;border:1px solid #D1D5DB;border-radius:6px;padding:8px 12px;font-size:14px;font-family:inherit;color:#1A1A2E;background:white;outline:none;cursor:pointer;">
+                  <option selected>Claude Haiku 4.5 (recommended)</option>
+                  <option>Claude Sonnet 4.6 (higher quality)</option>
+                </select>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:6px;">
+              Haiku 4.5 is faster and more cost-efficient. Switch to Sonnet 4.6 if evaluation quality needs improvement.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Danger zone -->
+      <div style="background:white;border-radius:8px;border:1px solid #FCA5A5;overflow:hidden;">
+        <div style="padding:14px 20px;border-bottom:1px solid #FCA5A5;background:#FFF5F5;">
+          <div style="font-size:13px;font-weight:600;color:#991B1B;text-transform:uppercase;letter-spacing:0.6px;">Data Management</div>
+        </div>
+        <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:14px;font-weight:500;color:#1A1A2E;margin-bottom:4px;">Clear all data</div>
+            <div style="font-size:13px;color:#6B7280;">Permanently deletes all employees, behavior entries, and framework configuration. This cannot be undone.</div>
+          </div>
+          <button style="flex-shrink:0;margin-left:32px;background:white;color:#991B1B;border:1px solid #FCA5A5;padding:8px 18px;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;">
+            Clear all data
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
