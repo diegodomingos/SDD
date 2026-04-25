@@ -4,6 +4,11 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import log from 'electron-log/main'
 import { initializeSchema, db } from './db/database'
+import type { AIProvider } from './ai/AIProvider'
+import { MockAIProvider } from './ai/MockAIProvider'
+
+// Swap MockAIProvider → ClaudeAIProvider here at Story 6.5 integration time — no other files change
+const aiProvider: AIProvider = new MockAIProvider()
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -48,6 +53,8 @@ app.whenReady().then(() => {
     app.quit()
     return
   }
+
+  log.info('[ai] Provider:', aiProvider.constructor.name)
 
   createWindow()
 

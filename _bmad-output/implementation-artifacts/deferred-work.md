@@ -41,3 +41,10 @@
 - `competency_id` FK in `behavior_log_entry_competencies` has no explicit `ON DELETE` action — implicit RESTRICT will raise cryptic FK error for callers deleting competencies
 - `created_at DEFAULT (datetime('now'))` stores UTC without timezone marker — ambiguous vs local time in UI display; address before cross-timezone use
 - No SQLite `STRICT` table mode — type affinity coercion can silently store wrong types (e.g., integer stored in TEXT column)
+
+## Deferred from: code review of 1-4-define-aiprovider-interface-and-implement-mockaiprovider (2026-04-25)
+
+- Timing assertion in `MockAIProvider.test.ts:34-38` uses `Date.now()` delta < 50ms as a network-call proxy — spec-mandated and safe for an in-process mock but could be flaky under heavy CI load; revisit if test flakiness is observed
+- `aiProvider.constructor.name` is used in a log statement (`src/main/index.ts`) — `Function.prototype.name` is stripped in minified Electron builds; low risk for an informational log, but consider a static string label if logs prove unreadable in prod
+- `EvaluationInput.expectedBehaviors` accepts empty string at the interface level — no type-level enforcement; `ClaudeAIProvider` and IPC handler must validate before calling the API (address in Story 6.5)
+- `aiProvider` is instantiated at module-load time before `app.whenReady()` (`src/main/index.ts:11`) — safe with MockAIProvider's trivial constructor; if `ClaudeAIProvider` reads `app.getPath()` or uses electron APIs in its constructor, it must be lazily instantiated inside `app.whenReady()` (address in Story 6.5)
