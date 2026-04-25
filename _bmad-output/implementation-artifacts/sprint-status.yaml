@@ -1,0 +1,92 @@
+# generated: 2026-04-24
+# last_updated: 2026-04-25
+# project: SDD
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-04-24
+last_updated: 2026-04-25
+project: SDD
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # ── Epic 1: Foundation — Scaffolded, Launchable App Shell ──────────────────
+  epic-1: in-progress
+  1-1-scaffold-and-configure-project: done
+  1-2-define-ipc-contract-and-shared-types: backlog
+  1-3-initialize-sqlite-database-with-schema-on-startup: backlog
+  1-4-define-aiprovider-interface-and-implement-mockaiprovider: backlog
+  1-5-wire-contextbridge-preload-and-ipc-handler-scaffold: backlog
+  1-6-mui-theme-and-app-shell: backlog
+  epic-1-retrospective: optional
+
+  # ── Epic 2: Employee Management ────────────────────────────────────────────
+  epic-2: backlog
+  2-1-employee-list-view: backlog
+  2-2-add-employee: backlog
+  2-3-edit-employee: backlog
+  2-4-remove-employee: backlog
+  epic-2-retrospective: optional
+
+  # ── Epic 3: Competency Framework Configuration ─────────────────────────────
+  epic-3: backlog
+  3-1-framework-view-with-expected-behavior-display: backlog
+  3-2-edit-expected-behaviors-inline: backlog
+  epic-3-retrospective: optional
+
+  # ── Epic 4: Behavior Logging ───────────────────────────────────────────────
+  epic-4: backlog
+  4-1-behavior-log-list-view: backlog
+  4-2-inline-behavior-log-entry-creation: backlog
+  4-3-filter-log-entries-by-competency: backlog
+  4-4-edit-and-delete-behavior-log-entries: backlog
+  epic-4-retrospective: optional
+
+  # ── Epic 5: Application Settings & API Configuration ───────────────────────
+  epic-5: backlog
+  5-1-settings-view-with-manager-display-name: backlog
+  5-2-claude-api-key-configuration-and-model-selection: backlog
+  5-3-danger-zone-clear-all-data: backlog
+  epic-5-retrospective: optional
+
+  # ── Epic 6: AI Competency Evaluation & Distribution ────────────────────────
+  epic-6: backlog
+  6-1-evaluate-tab-with-competency-filter-and-evidence-display: backlog
+  6-2-ai-grade-result-display: backlog
+  6-3-insufficient-input-outcome: backlog
+  6-4-ai-error-handling-and-network-resilience: backlog
+  6-5-real-claude-api-integration: backlog
+  6-6-testing-accessibility-and-packaging: backlog
+  epic-6-retrospective: optional
