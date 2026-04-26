@@ -1,5 +1,7 @@
 import { ipcMain } from 'electron'
 import log from 'electron-log/main'
+import { db } from '../db/database'
+import { listEmployees } from '../db/employees'
 import type {
   IpcResult,
   Employee,
@@ -12,7 +14,7 @@ export function registerEmployeeHandlers(): void {
   ipcMain.handle('employee:list', async (): Promise<IpcResult<Employee[]>> => {
     log.info('[employee:list]')
     try {
-      return { ok: true, data: [] }
+      return { ok: true, data: listEmployees(db!) }
     } catch (e) {
       log.error('[employee:list] error: %s', e instanceof Error ? e.message : String(e))
       return { ok: false, error: 'Failed to list employees.' }

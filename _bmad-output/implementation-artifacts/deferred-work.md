@@ -54,6 +54,15 @@
 - `setView` does not reset `selectedEmployeeId`/`selectedCompetency` on navigation (`appStore.ts:20`) — out of scope for Story 1.6; revisit if a future epic needs full state resets on nav
 - `body { user-select: none }` lost when electron-vite template `main.css` was removed (`main.tsx`) — Electron UX enhancement preventing accidental text selection in UI; address in a later UI polish story
 
+## Deferred from: code review of 2-1-employee-list-view (2026-04-25)
+
+- AC1 schema verification bypassed — `employees.test.ts` uses a hand-rolled mock instead of a real in-memory SQLite DB; ABI mismatch (Electron Node 22 ABI 140 vs system Node 20 ABI 137) prevents loading native module in Vitest. Reason: not worth risking code breakage to fix a test infrastructure issue right now (`sdd-app/__tests__/main/db/employees.test.ts`)
+- Test mock ignores SQL string in `employees.test.ts` — ABI mismatch prevents real better-sqlite3 in Vitest; mapping logic tested, SQL correctness trusted to SQLite (`sdd-app/__tests__/main/db/employees.test.ts`)
+- `createdAt` stores SQLite `datetime('now')` format (`YYYY-MM-DD HH:MM:SS`) not strict ISO 8601 — cross-cutting concern; renderer/AI layer must handle non-T-separator format (`sdd-app/src/main/db/employees.ts`)
+- `employees` state not cleared before reload in `useEmployees.load()` — stale data flash on re-fetch; not triggerable in Story 2.1 (mount-only); address if Story 2.2+ needs live-refresh UX (`sdd-app/src/renderer/src/hooks/useEmployees.ts`)
+- Concurrent `load()` calls produce a race condition — no cancellation or in-flight guard; not triggerable until Story 2.2+ adds additional trigger sources (`sdd-app/src/renderer/src/hooks/useEmployees.ts`)
+- No test covering null/missing `name`/`level` fields — SQLite NOT NULL constraint prevents at runtime; moot until constraint is relaxed or a migration loosens the schema (`sdd-app/__tests__/main/db/employees.test.ts`)
+
 ## Deferred from: code review of 1-5-wire-contextbridge-preload-and-ipc-handler-scaffold (2026-04-25)
 
 - `expected-behavior:set` catch block returns `'Not implemented.'` regardless of actual error — will mask real DB errors when Story 3.2 implements the function; update error message to something like `'Failed to set expected behavior.'` at that time (`sdd-app/src/main/handlers/frameworkHandlers.ts:41`)
