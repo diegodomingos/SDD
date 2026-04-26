@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import log from 'electron-log/main'
 import { db } from '../db/database'
-import { listEmployees, createEmployee } from '../db/employees'
+import { listEmployees, createEmployee, updateEmployee } from '../db/employees'
 import type {
   IpcResult,
   Employee,
@@ -42,7 +42,11 @@ export function registerEmployeeHandlers(): void {
     async (_event, payload: UpdateEmployeePayload): Promise<IpcResult<Employee>> => {
       log.info('[employee:update] id=%d', payload.id)
       try {
-        return { ok: false, error: 'Not implemented.' }
+        if (!payload.id || !Number.isInteger(payload.id) || payload.id < 1) return { ok: false, error: 'Invalid employee id.' }
+        if (!payload.name?.trim()) return { ok: false, error: 'Employee name is required.' }
+        if (!['A', 'B', 'C', 'D'].includes(payload.level)) return { ok: false, error: 'Invalid level.' }
+        const employee = updateEmployee(db!, payload.id, payload.name.trim(), payload.level)
+        return { ok: true, data: employee }
       } catch (e) {
         log.error('[employee:update] error: %s', e instanceof Error ? e.message : String(e))
         return { ok: false, error: 'Failed to update employee.' }

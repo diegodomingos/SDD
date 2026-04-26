@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 import { describe, it, expect } from 'vitest'
-import { listEmployees, createEmployee } from '../../../src/main/db/employees'
+import { listEmployees, createEmployee, updateEmployee } from '../../../src/main/db/employees'
 
 // Minimal mock: simulates better-sqlite3 prepare().all() without the native module.
 // Electron compiles better-sqlite3 against its own Node.js (ABI 140); Vitest runs on
@@ -48,6 +48,60 @@ describe('createEmployee', () => {
     const emp = createEmployee(mockDb, 'Bob', 'C')
     expect(emp.name).toBe('Bob')
     expect(emp.level).toBe('C')
+  })
+})
+
+function createMockDbForUpdate(updatedRow: object): Database.Database {
+  return {
+    prepare: (sql: string) => {
+      if (sql.trimStart().startsWith('UPDATE')) {
+        return { run: () => ({ changes: 1 }) }
+      }
+      return { get: () => updatedRow }
+    },
+  } as unknown as Database.Database
+}
+
+describe('updateEmployee', () => {
+  it('returns updated Employee with camelCase mapping', () => {
+    const mockDb = createMockDbForUpdate({
+      id: 3,
+      name: 'Alice Updated',
+      level: 'B',
+      created_at: '2026-04-26 10:00:00',
+    })
+    const emp = updateEmployee(mockDb, 3, 'Alice Updated', 'B')
+    expect(emp.id).toBe(3)
+    expect(emp.name).toBe('Alice Updated')
+    expect(emp.level).toBe('B')
+    expect(emp.createdAt).toBe('2026-04-26 10:00:00')
+    expect((emp as any).created_at).toBeUndefined()
+  })
+
+  it('passes updated name and level through to the returned Employee', () => {
+    const mockDb = createMockDbForUpdate({
+      id: 5,
+      name: 'Charlie',
+      level: 'C',
+      created_at: '2026-04-26 11:00:00',
+    })
+    const emp = updateEmployee(mockDb, 5, 'Charlie', 'C')
+    expect(emp.name).toBe('Charlie')
+    expect(emp.level).toBe('C')
+  })
+
+  it('throws when employee row is not found after update', () => {
+    const mockDb = {
+      prepare: (sql: string) => {
+        if (sql.trimStart().startsWith('UPDATE')) {
+          return { run: () => ({ changes: 0 }) }
+        }
+        return { get: () => undefined }
+      },
+    } as unknown as Database.Database
+    expect(() => updateEmployee(mockDb, 99, 'Ghost', 'A')).toThrow(
+      'Employee row not found after update (id=99)'
+    )
   })
 })
 

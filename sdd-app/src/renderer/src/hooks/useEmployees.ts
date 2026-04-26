@@ -36,7 +36,23 @@ export function useEmployees() {
     }
   }, [])
 
+  const update = useCallback(async (id: number, name: string, level: CompetencyLevel): Promise<boolean> => {
+    setError(null)
+    try {
+      const result = await window.electronAPI.invoke<Employee>('employee:update', { id, name, level })
+      if (result.ok) {
+        setEmployees(prev => prev.map(e => e.id === id ? result.data : e))
+        return true
+      }
+      setError(result.error)
+      return false
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unexpected error')
+      return false
+    }
+  }, [])
+
   const clearError = useCallback(() => setError(null), [])
 
-  return { employees, isLoading, error, load, create, clearError }
+  return { employees, isLoading, error, load, create, update, clearError }
 }

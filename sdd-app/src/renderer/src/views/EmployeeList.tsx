@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import {
   Alert,
   Box,
@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -22,24 +23,38 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
+import EditIcon from '@mui/icons-material/Edit'
 import type { SelectChangeEvent } from '@mui/material'
-import type { CompetencyLevel } from '../../../shared/ipc-types'
+import type { CompetencyLevel, Employee } from '../../../shared/ipc-types'
 import { useEmployees } from '../hooks/useEmployees'
 
 export default function EmployeeList(): React.JSX.Element {
-  const { employees, isLoading, error, load, create, clearError } = useEmployees()
+  const { employees, isLoading, error, load, create, update, clearError } = useEmployees()
 
+  // Add Employee dialog state
   const [dialogOpen, setDialogOpen] = useState(false)
   const [name, setName] = useState('')
   const [level, setLevel] = useState<CompetencyLevel | ''>('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Inline edit state
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editLevel, setEditLevel] = useState<CompetencyLevel | ''>('')
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false)
 
   useEffect(() => {
     load()
   }, [load])
 
-  const handleOpenDialog = () => setDialogOpen(true)
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // Add Employee dialog handlers
+  const handleOpenDialog = () => {
+    clearError()
+    setDialogOpen(true)
+  }
 
   const handleCloseDialog = () => {
     setDialogOpen(false)
@@ -61,6 +76,39 @@ export default function EmployeeList(): React.JSX.Element {
 
   const saveDisabled = !name.trim() || !level
 
+  // Inline edit handlers
+  const handleEditOpen = (emp: Employee) => {
+    if (editingId !== null) return
+    clearError()
+    setEditingId(emp.id)
+    setEditName(emp.name)
+    setEditLevel(emp.level)
+  }
+
+  const handleEditCancel = () => {
+    setEditingId(null)
+    setEditName('')
+    setEditLevel('')
+    clearError()
+  }
+
+  const handleEditSave = async () => {
+    if (isEditSubmitting) return
+    setIsEditSubmitting(true)
+    try {
+      const ok = await update(editingId!, editName.trim(), editLevel as CompetencyLevel)
+      if (ok) {
+        setEditingId(null)
+        setEditName('')
+        setEditLevel('')
+      }
+    } finally {
+      setIsEditSubmitting(false)
+    }
+  }
+
+  const editSaveDisabled = !editName.trim() || !editLevel
+
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -69,7 +117,7 @@ export default function EmployeeList(): React.JSX.Element {
     )
   }
 
-  if (error && !dialogOpen) {
+  if (error && !dialogOpen && editingId === null) {
     return <Alert severity="error">{error}</Alert>
   }
 
@@ -101,15 +149,87 @@ export default function EmployeeList(): React.JSX.Element {
                   <TableCell>
                     <Typography variant="subtitle2">Level</Typography>
                   </TableCell>
+                  <TableCell sx={{ width: 80 }} />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {employees.map((emp) => (
-                  <TableRow key={emp.id}>
-                    <TableCell>{emp.name}</TableCell>
-                    <TableCell>{emp.level}</TableCell>
-                  </TableRow>
-                ))}
+                {employees.map((emp) =>
+                  editingId === emp.id ? (
+                    <Fragment key={emp.id}>
+                      <TableRow>
+                        <TableCell>
+                          <TextField
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            size="small"
+                            autoFocus
+                            fullWidth
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <FormControl size="small" fullWidth>
+                            <Select
+                              value={editLevel}
+                              onChange={(e: SelectChangeEvent) =>
+                                setEditLevel(e.target.value as CompetencyLevel)
+                              }
+                            >
+                              <MenuItem value="A">A</MenuItem>
+                              <MenuItem value="B">B</MenuItem>
+                              <MenuItem value="C">C</MenuItem>
+                              <MenuItem value="D">D</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </TableCell>
+                        <TableCell>
+                          <IconButton
+                            aria-label="Save edit"
+                            size="medium"
+                            disabled={editSaveDisabled || isEditSubmitting}
+                            sx={{ opacity: editSaveDisabled || isEditSubmitting ? 0.4 : 1 }}
+                            onClick={handleEditSave}
+                          >
+                            <CheckIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            aria-label="Cancel edit"
+                            size="medium"
+                            onClick={handleEditCancel}
+                          >
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                      {error && (
+                        <TableRow>
+                          <TableCell colSpan={3} sx={{ pt: 0, pb: 0.5 }}>
+                            <Alert severity="error" sx={{ py: 0 }}>{error}</Alert>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
+                  ) : (
+                    <TableRow
+                      key={emp.id}
+                      onMouseEnter={() => setHoveredId(emp.id)}
+                      onMouseLeave={() => setHoveredId(null)}
+                    >
+                      <TableCell>{emp.name}</TableCell>
+                      <TableCell>{emp.level}</TableCell>
+                      <TableCell>
+                        {hoveredId === emp.id && (
+                          <IconButton
+                            aria-label="Edit employee"
+                            size="medium"
+                            onClick={() => handleEditOpen(emp)}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
           </TableContainer>

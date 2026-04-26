@@ -77,3 +77,13 @@
 - `payload.name` logged before null/undefined payload check — if IPC payload is malformed, `payload.name` access throws before validation guard; IPC boundary integrity currently assumed from preload setup (`sdd-app/src/main/handlers/employeeHandlers.ts`)
 - Test mock SQL matching fragility — `trimStart().startsWith('INSERT')` silently falls through to wrong branch on lower-case or CTE-prefixed SQL; add explicit SELECT branch check when tests are refactored (`sdd-app/__tests__/main/db/employees.test.ts`)
 - No `maxLength` on name `TextField` — unbounded input; DB schema should enforce column length; add client-side cap when UI hardening story is planned (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)
+
+## Deferred from: code review of 2-3-edit-employee (2026-04-26)
+
+- `db!` non-null assertion in employee:update handler — pre-existing pattern across all handlers; if db is undefined, SQLite crashes and surfaces as generic error; address when DB initialization lifecycle is hardened (`sdd-app/src/main/handlers/employeeHandlers.ts:47`)
+- Non-atomic UPDATE+SELECT in updateEmployee — no transaction wrapping; single-user desktop app has no concurrency risk in practice; address if multi-window or multi-process scenarios are introduced (`sdd-app/src/main/db/employees.ts`)
+- Employee row id leaked in application log via throw message — `throw new Error(\`Employee row not found after update (id=${id})\`)` logged verbatim; local desktop logs only, low concern (`sdd-app/src/main/db/employees.ts:41`)
+- `editingId!` non-null assertion in handleEditSave — UI gate (disabled button) prevents the null path; theoretical risk only for programmatic invocation (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)
+- `editLevel as CompetencyLevel` cast without runtime re-check inside handleEditSave — guarded by editSaveDisabled flag and IPC server-side level validation; revisit if keyboard submit path is added (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)
+- `setError(null)` in update() clears unrelated concurrent errors — pre-existing hook design shared with create(); low impact in single-user desktop context (`sdd-app/src/renderer/src/hooks/useEmployees.ts`)
+- Edit icon uses JS conditional rendering (hover state) instead of CSS-only visibility — AC doesn't specify mechanism; keyboard focus-based reveal not required by spec; revisit in accessibility pass (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)
