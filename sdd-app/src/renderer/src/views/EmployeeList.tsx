@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   FormControl,
   IconButton,
@@ -25,19 +26,24 @@ import {
 } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import CloseIcon from '@mui/icons-material/Close'
+import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import type { SelectChangeEvent } from '@mui/material'
 import type { CompetencyLevel, Employee } from '../../../shared/ipc-types'
 import { useEmployees } from '../hooks/useEmployees'
 
 export default function EmployeeList(): React.JSX.Element {
-  const { employees, isLoading, error, load, create, update, clearError } = useEmployees()
+  const { employees, isLoading, error, load, create, update, remove, clearError } = useEmployees()
 
   // Add Employee dialog state
   const [dialogOpen, setDialogOpen] = useState(false)
   const [name, setName] = useState('')
   const [level, setLevel] = useState<CompetencyLevel | ''>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Delete confirmation state
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Inline edit state
   const [hoveredId, setHoveredId] = useState<number | null>(null)
@@ -109,6 +115,15 @@ export default function EmployeeList(): React.JSX.Element {
 
   const editSaveDisabled = !editName.trim() || !editLevel
 
+  // Delete confirmation handler
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirmId === null) return
+    setIsDeleting(true)
+    const ok = await remove(deleteConfirmId)
+    setIsDeleting(false)
+    if (ok) setDeleteConfirmId(null)
+  }
+
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -117,7 +132,7 @@ export default function EmployeeList(): React.JSX.Element {
     )
   }
 
-  if (error && !dialogOpen && editingId === null) {
+  if (error && !dialogOpen && editingId === null && deleteConfirmId === null) {
     return <Alert severity="error">{error}</Alert>
   }
 
@@ -149,7 +164,7 @@ export default function EmployeeList(): React.JSX.Element {
                   <TableCell>
                     <Typography variant="subtitle2">Level</Typography>
                   </TableCell>
-                  <TableCell sx={{ width: 80 }} />
+                  <TableCell sx={{ width: 120 }} />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -218,13 +233,22 @@ export default function EmployeeList(): React.JSX.Element {
                       <TableCell>{emp.level}</TableCell>
                       <TableCell>
                         {hoveredId === emp.id && (
-                          <IconButton
-                            aria-label="Edit employee"
-                            size="medium"
-                            onClick={() => handleEditOpen(emp)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
+                          <>
+                            <IconButton
+                              aria-label="Edit employee"
+                              size="medium"
+                              onClick={() => handleEditOpen(emp)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              aria-label="Delete employee"
+                              size="medium"
+                              onClick={() => { if (editingId === null) setDeleteConfirmId(emp.id) }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </>
                         )}
                       </TableCell>
                     </TableRow>
@@ -235,6 +259,31 @@ export default function EmployeeList(): React.JSX.Element {
           </TableContainer>
         </>
       )}
+
+      <Dialog
+        open={deleteConfirmId !== null}
+        onClose={() => { setDeleteConfirmId(null); clearError() }}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete Employee</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            All associated behavior log entries will also be deleted. This cannot be undone.
+          </DialogContentText>
+          {error && deleteConfirmId !== null && (
+            <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={() => { setDeleteConfirmId(null); clearError() }}>
+            Cancel
+          </Button>
+          <Button variant="outlined" color="error" onClick={handleDeleteConfirm} disabled={isDeleting}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
         <DialogTitle>Add Employee</DialogTitle>

@@ -87,3 +87,12 @@
 - `editLevel as CompetencyLevel` cast without runtime re-check inside handleEditSave — guarded by editSaveDisabled flag and IPC server-side level validation; revisit if keyboard submit path is added (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)
 - `setError(null)` in update() clears unrelated concurrent errors — pre-existing hook design shared with create(); low impact in single-user desktop context (`sdd-app/src/renderer/src/hooks/useEmployees.ts`)
 - Edit icon uses JS conditional rendering (hover state) instead of CSS-only visibility — AC doesn't specify mechanism; keyboard focus-based reveal not required by spec; revisit in accessibility pass (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)
+
+## Deferred from: code review of 2-4-remove-employee (2026-04-26)
+
+- `db!` non-null assertion without runtime null guard — pre-existing pattern across all handlers; if `db` is null, crashes with generic error (`sdd-app/src/main/handlers/employeeHandlers.ts:63`)
+- `payload` null/undefined check missing before `payload.id` access — accessing `payload.id` before `!payload` guard; pre-existing pattern in create/update handlers (`sdd-app/src/main/handlers/employeeHandlers.ts:62`)
+- `result.error` may be `undefined` when `ok === false` — `setError(result.error)` has no fallback string; pre-existing in create/update hooks (`sdd-app/src/renderer/src/hooks/useEmployees.ts:63`)
+- No test for DB-throws path in `deleteEmployee` — only normal return mocked; exception propagation to handler catch is implicitly trusted (`sdd-app/__tests__/main/db/employees.test.ts`)
+- `payload.id` type validation fragility — no `typeof` guard; relies on `Number.isInteger` incidentally rejecting strings; TypeScript IPC types prevent this in practice (`sdd-app/src/main/handlers/employeeHandlers.ts:62`)
+- `async` handler wraps synchronous `deleteEmployee` — consistent with pre-existing handler pattern; style-only concern (`sdd-app/src/main/handlers/employeeHandlers.ts:58`)

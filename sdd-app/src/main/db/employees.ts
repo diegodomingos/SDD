@@ -41,3 +41,7 @@ export function updateEmployee(db: Database.Database, id: number, name: string, 
   if (!row) throw new Error(`Employee row not found after update (id=${id})`)
   return mapToEmployee(row)
 }
+
+export function deleteEmployee(db: Database.Database, id: number): void {
+  db.prepare('DELETE FROM employees WHERE id = ?').run(id)
+}

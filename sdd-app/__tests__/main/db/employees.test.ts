@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 import { describe, it, expect } from 'vitest'
-import { listEmployees, createEmployee, updateEmployee } from '../../../src/main/db/employees'
+import { listEmployees, createEmployee, updateEmployee, deleteEmployee } from '../../../src/main/db/employees'
 
 // Minimal mock: simulates better-sqlite3 prepare().all() without the native module.
 // Electron compiles better-sqlite3 against its own Node.js (ABI 140); Vitest runs on
@@ -102,6 +102,23 @@ describe('updateEmployee', () => {
     expect(() => updateEmployee(mockDb, 99, 'Ghost', 'A')).toThrow(
       'Employee row not found after update (id=99)'
     )
+  })
+})
+
+describe('deleteEmployee', () => {
+  it('executes DELETE for the given id without throwing', () => {
+    const mockDb = {
+      prepare: (_sql: string) => ({ run: () => ({ changes: 1 }) }),
+    } as unknown as Database.Database
+    expect(() => deleteEmployee(mockDb, 3)).not.toThrow()
+  })
+
+  it('returns void (undefined)', () => {
+    const mockDb = {
+      prepare: (_sql: string) => ({ run: () => ({ changes: 0 }) }),
+    } as unknown as Database.Database
+    const result = deleteEmployee(mockDb, 99)
+    expect(result).toBeUndefined()
   })
 })
 

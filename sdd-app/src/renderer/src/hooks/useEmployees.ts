@@ -52,7 +52,23 @@ export function useEmployees() {
     }
   }, [])
 
+  const remove = useCallback(async (id: number): Promise<boolean> => {
+    setError(null)
+    try {
+      const result = await window.electronAPI.invoke<null>('employee:delete', { id })
+      if (result.ok) {
+        setEmployees(prev => prev.filter(e => e.id !== id))
+        return true
+      }
+      setError(result.error)
+      return false
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unexpected error')
+      return false
+    }
+  }, [])
+
   const clearError = useCallback(() => setError(null), [])
 
-  return { employees, isLoading, error, load, create, update, clearError }
+  return { employees, isLoading, error, load, create, update, remove, clearError }
 }

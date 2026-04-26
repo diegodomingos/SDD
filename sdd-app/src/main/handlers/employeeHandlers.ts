@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import log from 'electron-log/main'
 import { db } from '../db/database'
-import { listEmployees, createEmployee, updateEmployee } from '../db/employees'
+import { listEmployees, createEmployee, updateEmployee, deleteEmployee } from '../db/employees'
 import type {
   IpcResult,
   Employee,
@@ -59,7 +59,9 @@ export function registerEmployeeHandlers(): void {
     async (_event, payload: DeleteEmployeePayload): Promise<IpcResult<null>> => {
       log.info('[employee:delete] id=%d', payload.id)
       try {
-        return { ok: false, error: 'Not implemented.' }
+        if (!payload.id || !Number.isInteger(payload.id) || payload.id < 1) return { ok: false, error: 'Invalid employee id.' }
+        deleteEmployee(db!, payload.id)
+        return { ok: true, data: null }
       } catch (e) {
         log.error('[employee:delete] error: %s', e instanceof Error ? e.message : String(e))
         return { ok: false, error: 'Failed to delete employee.' }

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-04-26 # story 2-3 done after code review
+last_updated: 2026-04-26 # story 2-4 done
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -57,7 +57,7 @@ development_status:
   2-1-employee-list-view: done
   2-2-add-employee: done
   2-3-edit-employee: done
-  2-4-remove-employee: backlog
+  2-4-remove-employee: done
   epic-2-retrospective: optional
 
   # ── Epic 3: Competency Framework Configuration ─────────────────────────────
