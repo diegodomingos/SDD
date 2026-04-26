@@ -1,22 +1,31 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
 
-// Custom APIs for renderer
-const api = {}
+const ALLOWED_CHANNELS = new Set([
+  'employee:list',
+  'employee:create',
+  'employee:update',
+  'employee:delete',
+  'behavior-log:list',
+  'behavior-log:create',
+  'behavior-log:update',
+  'behavior-log:delete',
+  'competency:list',
+  'expected-behavior:get',
+  'expected-behavior:set',
+  'ai:evaluate',
+  'settings:get-key-configured',
+  'settings:set-api-key',
+  'settings:get-model',
+  'settings:set-model',
+  'settings:get-manager-name',
+  'settings:set-manager-name',
+])
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
+contextBridge.exposeInMainWorld('electronAPI', {
+  invoke: (channel: string, payload?: unknown) => {
+    if (!ALLOWED_CHANNELS.has(channel)) {
+      throw new Error(`IPC channel not allowed: ${channel}`)
+    }
+    return ipcRenderer.invoke(channel, payload)
   }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
-}
+})

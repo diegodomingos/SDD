@@ -48,3 +48,11 @@
 - `aiProvider.constructor.name` is used in a log statement (`src/main/index.ts`) — `Function.prototype.name` is stripped in minified Electron builds; low risk for an informational log, but consider a static string label if logs prove unreadable in prod
 - `EvaluationInput.expectedBehaviors` accepts empty string at the interface level — no type-level enforcement; `ClaudeAIProvider` and IPC handler must validate before calling the API (address in Story 6.5)
 - `aiProvider` is instantiated at module-load time before `app.whenReady()` (`src/main/index.ts:11`) — safe with MockAIProvider's trivial constructor; if `ClaudeAIProvider` reads `app.getPath()` or uses electron APIs in its constructor, it must be lazily instantiated inside `app.whenReady()` (address in Story 6.5)
+
+## Deferred from: code review of 1-5-wire-contextbridge-preload-and-ipc-handler-scaffold (2026-04-25)
+
+- `expected-behavior:set` catch block returns `'Not implemented.'` regardless of actual error — will mask real DB errors when Story 3.2 implements the function; update error message to something like `'Failed to set expected behavior.'` at that time (`sdd-app/src/main/handlers/frameworkHandlers.ts:41`)
+- No runtime payload validation across all IPC handlers — payloads typed but not validated at runtime; a systemic design decision for a future validation/guard layer before Epic 2+
+- `db` null-guard missing in stub functions `getExpectedBehavior` and `setExpectedBehavior` — add `if (!db) throw new Error('Database not initialized')` guards when Stories 3.1/3.2 implement the functions (`sdd-app/src/main/db/framework.ts:9-25`)
+- `settings:set-api-key` — no API key redaction pattern established; establish `log.info('[settings:set-api-key] (key redacted)')` pattern before Story 5.2 implements this handler (`sdd-app/src/main/handlers/settingsHandlers.ts:28`)
+- Double-registration risk on macOS `activate` callback — handler registrations are correctly outside the activate callback today; ensure they stay outside if `app.whenReady()` block is refactored (`sdd-app/src/main/index.ts:62`)
