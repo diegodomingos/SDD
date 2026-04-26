@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 import { describe, it, expect } from 'vitest'
-import { listEmployees } from '../../../src/main/db/employees'
+import { listEmployees, createEmployee } from '../../../src/main/db/employees'
 
 // Minimal mock: simulates better-sqlite3 prepare().all() without the native module.
 // Electron compiles better-sqlite3 against its own Node.js (ABI 140); Vitest runs on
@@ -10,6 +10,46 @@ function createMockDb(rows: object[]): Database.Database {
     prepare: (_sql: string) => ({ all: () => rows }),
   } as unknown as Database.Database
 }
+
+function createMockDbForCreate(insertedRow: object): Database.Database {
+  return {
+    prepare: (sql: string) => {
+      if (sql.trimStart().startsWith('INSERT')) {
+        return { run: () => ({ lastInsertRowid: (insertedRow as any).id, changes: 1 }) }
+      }
+      return { get: () => insertedRow }
+    },
+  } as unknown as Database.Database
+}
+
+describe('createEmployee', () => {
+  it('returns a camelCase Employee with correct id, name, level, createdAt', () => {
+    const mockDb = createMockDbForCreate({
+      id: 7,
+      name: 'Alice',
+      level: 'A',
+      created_at: '2026-04-26 10:00:00',
+    })
+    const emp = createEmployee(mockDb, 'Alice', 'A')
+    expect(emp.id).toBe(7)
+    expect(emp.name).toBe('Alice')
+    expect(emp.level).toBe('A')
+    expect(emp.createdAt).toBe('2026-04-26 10:00:00')
+    expect((emp as any).created_at).toBeUndefined()
+  })
+
+  it('passes the name and level values through to the returned Employee', () => {
+    const mockDb = createMockDbForCreate({
+      id: 3,
+      name: 'Bob',
+      level: 'C',
+      created_at: '2026-04-26 11:00:00',
+    })
+    const emp = createEmployee(mockDb, 'Bob', 'C')
+    expect(emp.name).toBe('Bob')
+    expect(emp.level).toBe('C')
+  })
+})
 
 describe('listEmployees', () => {
   it('returns empty array when no rows', () => {

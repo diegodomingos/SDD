@@ -70,3 +70,10 @@
 - `db` null-guard missing in stub functions `getExpectedBehavior` and `setExpectedBehavior` — add `if (!db) throw new Error('Database not initialized')` guards when Stories 3.1/3.2 implement the functions (`sdd-app/src/main/db/framework.ts:9-25`)
 - `settings:set-api-key` — no API key redaction pattern established; establish `log.info('[settings:set-api-key] (key redacted)')` pattern before Story 5.2 implements this handler (`sdd-app/src/main/handlers/settingsHandlers.ts:28`)
 - Double-registration risk on macOS `activate` callback — handler registrations are correctly outside the activate callback today; ensure they stay outside if `app.whenReady()` block is refactored (`sdd-app/src/main/index.ts:62`)
+
+## Deferred from: code review of 2-2-add-employee (2026-04-26)
+
+- `db!` non-null assertion — pre-existing pattern across all handlers; if `db` is undefined, SQLite crashes inside the called function and surfaces as generic error; address when DB initialization lifecycle is hardened (`sdd-app/src/main/handlers/employeeHandlers.ts`)
+- `payload.name` logged before null/undefined payload check — if IPC payload is malformed, `payload.name` access throws before validation guard; IPC boundary integrity currently assumed from preload setup (`sdd-app/src/main/handlers/employeeHandlers.ts`)
+- Test mock SQL matching fragility — `trimStart().startsWith('INSERT')` silently falls through to wrong branch on lower-case or CTE-prefixed SQL; add explicit SELECT branch check when tests are refactored (`sdd-app/__tests__/main/db/employees.test.ts`)
+- No `maxLength` on name `TextField` — unbounded input; DB schema should enforce column length; add client-side cap when UI hardening story is planned (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)

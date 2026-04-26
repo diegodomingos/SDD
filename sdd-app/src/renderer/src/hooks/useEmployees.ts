@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { Employee } from '../../../shared/ipc-types'
+import type { Employee, CompetencyLevel } from '../../../shared/ipc-types'
 
 export function useEmployees() {
   const [employees, setEmployees] = useState<Employee[]>([])
@@ -20,5 +20,23 @@ export function useEmployees() {
     }
   }, [])
 
-  return { employees, isLoading, error, load }
+  const create = useCallback(async (name: string, level: CompetencyLevel): Promise<boolean> => {
+    setError(null)
+    try {
+      const result = await window.electronAPI.invoke<Employee>('employee:create', { name, level })
+      if (result.ok) {
+        setEmployees(prev => [result.data, ...prev])
+        return true
+      }
+      setError(result.error)
+      return false
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unexpected error')
+      return false
+    }
+  }, [])
+
+  const clearError = useCallback(() => setError(null), [])
+
+  return { employees, isLoading, error, load, create, clearError }
 }

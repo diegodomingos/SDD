@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import log from 'electron-log/main'
 import { db } from '../db/database'
-import { listEmployees } from '../db/employees'
+import { listEmployees, createEmployee } from '../db/employees'
 import type {
   IpcResult,
   Employee,
@@ -26,7 +26,10 @@ export function registerEmployeeHandlers(): void {
     async (_event, payload: CreateEmployeePayload): Promise<IpcResult<Employee>> => {
       log.info('[employee:create] name=%s level=%s', payload.name, payload.level)
       try {
-        return { ok: false, error: 'Not implemented.' }
+        if (!payload.name?.trim()) return { ok: false, error: 'Employee name is required.' }
+        if (!['A', 'B', 'C', 'D'].includes(payload.level)) return { ok: false, error: 'Invalid level.' }
+        const employee = createEmployee(db!, payload.name.trim(), payload.level)
+        return { ok: true, data: employee }
       } catch (e) {
         log.error('[employee:create] error: %s', e instanceof Error ? e.message : String(e))
         return { ok: false, error: 'Failed to create employee.' }
