@@ -1,27 +1,26 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+import { CssBaseline, ThemeProvider } from '@mui/material'
+import AppShell from './components/layout/AppShell'
+import { useAppStore } from './store/appStore'
+import theme from './theme/theme'
+import EmployeeList from './views/EmployeeList'
+import Framework from './views/Framework'
+import Settings from './views/Settings'
+
+function ViewRouter(): React.JSX.Element {
+  const currentView = useAppStore((s) => s.currentView)
+  if (currentView === 'framework') return <Framework />
+  if (currentView === 'settings') return <Settings />
+  return <EmployeeList />
+}
 
 function App(): React.JSX.Element {
   return (
-    <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-      </div>
-      <Versions></Versions>
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AppShell>
+        <ViewRouter />
+      </AppShell>
+    </ThemeProvider>
   )
 }
 

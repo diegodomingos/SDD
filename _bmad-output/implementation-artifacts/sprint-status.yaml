@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-04-25 # story 1-5 reviewed and done
+last_updated: 2026-04-25 # story 1-6 review complete, done
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -49,7 +49,7 @@ development_status:
   1-3-initialize-sqlite-database-with-schema-on-startup: done
   1-4-define-aiprovider-interface-and-implement-mockaiprovider: done
   1-5-wire-contextbridge-preload-and-ipc-handler-scaffold: done
-  1-6-mui-theme-and-app-shell: backlog
+  1-6-mui-theme-and-app-shell: done
   epic-1-retrospective: optional
 
   # ── Epic 2: Employee Management ────────────────────────────────────────────

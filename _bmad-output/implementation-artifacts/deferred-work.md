@@ -49,6 +49,11 @@
 - `EvaluationInput.expectedBehaviors` accepts empty string at the interface level — no type-level enforcement; `ClaudeAIProvider` and IPC handler must validate before calling the API (address in Story 6.5)
 - `aiProvider` is instantiated at module-load time before `app.whenReady()` (`src/main/index.ts:11`) — safe with MockAIProvider's trivial constructor; if `ClaudeAIProvider` reads `app.getPath()` or uses electron APIs in its constructor, it must be lazily instantiated inside `app.whenReady()` (address in Story 6.5)
 
+## Deferred from: code review of 1-6-mui-theme-and-app-shell (2026-04-25)
+
+- `setView` does not reset `selectedEmployeeId`/`selectedCompetency` on navigation (`appStore.ts:20`) — out of scope for Story 1.6; revisit if a future epic needs full state resets on nav
+- `body { user-select: none }` lost when electron-vite template `main.css` was removed (`main.tsx`) — Electron UX enhancement preventing accidental text selection in UI; address in a later UI polish story
+
 ## Deferred from: code review of 1-5-wire-contextbridge-preload-and-ipc-handler-scaffold (2026-04-25)
 
 - `expected-behavior:set` catch block returns `'Not implemented.'` regardless of actual error — will mask real DB errors when Story 3.2 implements the function; update error message to something like `'Failed to set expected behavior.'` at that time (`sdd-app/src/main/handlers/frameworkHandlers.ts:41`)
