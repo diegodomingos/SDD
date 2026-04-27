@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-04-26 # story 3-1 done
+last_updated: 2026-04-26 # story 3-2 done
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -63,7 +63,7 @@ development_status:
   # ── Epic 3: Competency Framework Configuration ─────────────────────────────
   epic-3: in-progress
   3-1-framework-view-with-expected-behavior-display: done
-  3-2-edit-expected-behaviors-inline: backlog
+  3-2-edit-expected-behaviors-inline: done
   epic-3-retrospective: optional
 
   # ── Epic 4: Behavior Logging ───────────────────────────────────────────────

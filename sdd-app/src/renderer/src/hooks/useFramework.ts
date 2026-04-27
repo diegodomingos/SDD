@@ -61,7 +61,31 @@ function useFramework() {
 
   const clearError = useCallback(() => setError(null), [])
 
-  return { competencies, behaviors, isLoading, error, load, clearError }
+  const saveBehavior = useCallback(
+    async (competencyId: number, level: CompetencyLevel, description: string): Promise<boolean> => {
+      setError(null)
+      const result = await window.electronAPI.invoke<string>('expected-behavior:set', {
+        competencyId,
+        level,
+        description,
+      })
+      if (!result.ok) {
+        setError(result.error)
+        return false
+      }
+      setBehaviors((prev) => ({
+        ...prev,
+        [competencyId]: {
+          ...(prev[competencyId] ?? { A: null, B: null, C: null, D: null }),
+          [level]: result.data,
+        },
+      }))
+      return true
+    },
+    []
+  )
+
+  return { competencies, behaviors, isLoading, error, load, clearError, saveBehavior }
 }
 
 export default useFramework

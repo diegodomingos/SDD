@@ -106,3 +106,16 @@
 - Empty-competency list renders no empty-state message — DB is always seeded with 4 competencies; address if a future admin flow can delete all competencies (`sdd-app/src/renderer/src/views/Framework.tsx`)
 - Test suite does not verify SQL string passed to `prepare()` in `listCompetencies` — behavior tested; SQL correctness trusted to SQLite; add if query becomes complex (`sdd-app/__tests__/main/db/framework.test.ts:41-57`)
 - `ExpectedBehaviorMap` type is local to `useFramework.ts` and not exported — dev notes mark it renderer-internal; export when Story 3.2 needs to annotate it externally (`sdd-app/src/renderer/src/hooks/useFramework.ts:3`)
+
+## Deferred from: code review of 3-2-edit-expected-behaviors-inline (2026-04-26)
+
+- Optimistic state update: `setExpectedBehavior` echoes input string rather than re-reading from DB; if a trigger or future coercion transforms the value, UI and DB diverge silently (`sdd-app/src/main/db/framework.ts:24`)
+- `!db` null-guard in `setExpectedBehavior` inconsistent with `listCompetencies` (no guard); address when DB init lifecycle is hardened (`sdd-app/src/main/db/framework.ts:21`)
+- DB function accepts empty/whitespace description — validation lives only at handler boundary; any direct caller can persist blank values (`sdd-app/src/main/db/framework.ts:18-26`)
+- Inline arrow handlers inside table-row map recreate on every render; no `useCallback` wrapping for `onChange`, `onKeyDown`, `onClick` closures (`sdd-app/src/renderer/src/views/Framework.tsx:106-128`)
+- Handler does not validate `competencyId` (positive integer / FK existence) — defence-in-depth gap; address in a future validation layer (`sdd-app/src/main/handlers/frameworkHandlers.ts:36`)
+- No in-flight guard in `saveBehavior`; rapid double-click can dispatch parallel IPC calls that race on `behaviors` state update (`sdd-app/src/renderer/src/hooks/useFramework.ts:64`)
+- `editingCell`/`draftText` not reconciled with `behaviors` if `load()` re-fires while a cell is in edit mode; theoretical until an auto-refresh trigger is added
+- `Escape` handler missing `e.preventDefault()` / `e.stopPropagation()`; could bubble to parent in future modal wrapper (`sdd-app/src/renderer/src/views/Framework.tsx:109`)
+- No test coverage for `!db` null-guard branch in `setExpectedBehavior` (`sdd-app/__tests__/main/db/framework.test.ts`)
+- Handler trims description before passing to repository (`_payload.description.trim()`); spec is silent on trimming — intentional defensive behaviour but unspecified (`sdd-app/src/main/handlers/frameworkHandlers.ts:40`)

@@ -18,10 +18,10 @@ export function setExpectedBehavior(
   competencyId: number,
   level: CompetencyLevel,
   description: string
-): never {
-  // Full implementation: Story 3.2
-  void competencyId
-  void level
-  void description
-  throw new Error('Not implemented')
+): string {
+  if (!db) throw new Error('Database not initialized')
+  db.prepare(
+    'INSERT OR REPLACE INTO expected_behaviors (competency_id, level, description) VALUES (?, ?, ?)'
+  ).run(competencyId, level, description)
+  return description
 }

@@ -6,7 +6,7 @@ const mockDb = vi.hoisted(() => ({ prepare: vi.fn() }))
 
 vi.mock('../../../src/main/db/database', () => ({ db: mockDb }))
 
-import { getExpectedBehavior, listCompetencies } from '../../../src/main/db/framework'
+import { getExpectedBehavior, listCompetencies, setExpectedBehavior } from '../../../src/main/db/framework'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -55,5 +55,28 @@ describe('listCompetencies', () => {
   it('returns empty array when no competencies', () => {
     mockDb.prepare.mockReturnValue({ all: () => [] })
     expect(listCompetencies()).toEqual([])
+  })
+})
+
+describe('setExpectedBehavior', () => {
+  it('calls INSERT OR REPLACE with correct competencyId, level, and description', () => {
+    const mockRun = vi.fn()
+    mockDb.prepare.mockReturnValue({ run: mockRun })
+    setExpectedBehavior(1, 'A', 'Communicates clearly in writing.')
+    expect(mockRun).toHaveBeenCalledWith(1, 'A', 'Communicates clearly in writing.')
+  })
+
+  it('returns the saved description string', () => {
+    mockDb.prepare.mockReturnValue({ run: vi.fn() })
+    const result = setExpectedBehavior(2, 'B', 'Proactively identifies blockers')
+    expect(result).toBe('Proactively identifies blockers')
+  })
+
+  it('calls prepare with INSERT OR REPLACE SQL', () => {
+    mockDb.prepare.mockReturnValue({ run: vi.fn() })
+    setExpectedBehavior(3, 'C', 'Some behavior')
+    expect(mockDb.prepare).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT OR REPLACE INTO expected_behaviors')
+    )
   })
 })

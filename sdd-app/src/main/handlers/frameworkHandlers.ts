@@ -32,13 +32,16 @@ export function registerFrameworkHandlers(): void {
   ipcMain.handle(
     'expected-behavior:set',
     async (_event, _payload: SetExpectedBehaviorPayload): Promise<IpcResult<string>> => {
-      log.info('[expected-behavior:set]')
+      log.info('[expected-behavior:set] competencyId=%d level=%s', _payload.competencyId, _payload.level)
       try {
-        setExpectedBehavior(_payload.competencyId, _payload.level, _payload.description)
-        return { ok: true, data: _payload.description }
+        if (!_payload.description?.trim()) {
+          return { ok: false, error: 'Expected behavior description is required.' }
+        }
+        const saved = setExpectedBehavior(_payload.competencyId, _payload.level, _payload.description.trim())
+        return { ok: true, data: saved }
       } catch (e) {
         log.error('[expected-behavior:set] error: %s', e instanceof Error ? e.message : String(e))
-        return { ok: false, error: 'Not implemented.' }
+        return { ok: false, error: 'Failed to set expected behavior.' }
       }
     }
   )
