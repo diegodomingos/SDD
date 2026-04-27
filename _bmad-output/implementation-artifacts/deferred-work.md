@@ -96,3 +96,13 @@
 - No test for DB-throws path in `deleteEmployee` — only normal return mocked; exception propagation to handler catch is implicitly trusted (`sdd-app/__tests__/main/db/employees.test.ts`)
 - `payload.id` type validation fragility — no `typeof` guard; relies on `Number.isInteger` incidentally rejecting strings; TypeScript IPC types prevent this in practice (`sdd-app/src/main/handlers/employeeHandlers.ts:62`)
 - `async` handler wraps synchronous `deleteEmployee` — consistent with pre-existing handler pattern; style-only concern (`sdd-app/src/main/handlers/employeeHandlers.ts:58`)
+
+## Deferred from: code review of 3-1-framework-view-with-expected-behavior-display (2026-04-26)
+
+- `load()` has no concurrent-call guard; re-invocations can corrupt competencies/behaviors state mismatch — no reload UI in Story 3.1; address when a refresh trigger is added (`sdd-app/src/renderer/src/hooks/useFramework.ts:14-48`)
+- `getExpectedBehavior` null guard (`if (!db) throw`) inconsistent with `listCompetencies` which has no guard — defensive pre-existing inconsistency; address when DB init lifecycle is hardened (`sdd-app/src/main/db/framework.ts:10`)
+- SQLite result cast `as { description: string }` hides schema drift — standard better-sqlite3 pattern; revisit if schema changes or `STRICT` mode is adopted (`sdd-app/src/main/db/framework.ts:12-13`)
+- Row header cells (`comp.name`) in `<TableBody>` rendered as `<td>` without `scope="row"` — spec only requires `scope="col"` for column headers; address in a future accessibility pass (`sdd-app/src/renderer/src/views/Framework.tsx`)
+- Empty-competency list renders no empty-state message — DB is always seeded with 4 competencies; address if a future admin flow can delete all competencies (`sdd-app/src/renderer/src/views/Framework.tsx`)
+- Test suite does not verify SQL string passed to `prepare()` in `listCompetencies` — behavior tested; SQL correctness trusted to SQLite; add if query becomes complex (`sdd-app/__tests__/main/db/framework.test.ts:41-57`)
+- `ExpectedBehaviorMap` type is local to `useFramework.ts` and not exported — dev notes mark it renderer-internal; export when Story 3.2 needs to annotate it externally (`sdd-app/src/renderer/src/hooks/useFramework.ts:3`)

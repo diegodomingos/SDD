@@ -7,10 +7,11 @@ export function listCompetencies(): Competency[] {
 }
 
 export function getExpectedBehavior(competencyId: number, level: CompetencyLevel): string | null {
-  // Full implementation: Story 3.1
-  void competencyId
-  void level
-  return null
+  if (!db) throw new Error('Database not initialized')
+  const row = db
+    .prepare('SELECT description FROM expected_behaviors WHERE competency_id = ? AND level = ?')
+    .get(competencyId, level) as { description: string } | undefined
+  return row?.description ?? null
 }
 
 export function setExpectedBehavior(
