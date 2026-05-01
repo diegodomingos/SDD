@@ -119,3 +119,10 @@
 - `Escape` handler missing `e.preventDefault()` / `e.stopPropagation()`; could bubble to parent in future modal wrapper (`sdd-app/src/renderer/src/views/Framework.tsx:109`)
 - No test coverage for `!db` null-guard branch in `setExpectedBehavior` (`sdd-app/__tests__/main/db/framework.test.ts`)
 - Handler trims description before passing to repository (`_payload.description.trim()`); spec is silent on trimming — intentional defensive behaviour but unspecified (`sdd-app/src/main/handlers/frameworkHandlers.ts:40`)
+
+## Deferred from: code review of 3-3-ux-polish-framework-and-shell (2026-05-01)
+
+- Hover-only action buttons in EmployeeList — keyboard inaccessibility (WCAG 2.1 SC 2.1.1); pre-existing pattern from Story 2.x; address in accessibility pass (`sdd-app/src/renderer/src/views/EmployeeList.tsx`)
+- `confirmSave` has no double-click in-flight guard — parallel IPC calls can race on behaviors state; pre-existing pattern noted in Story 3.2 review (`sdd-app/src/renderer/src/hooks/useFramework.ts:64`)
+- `COMPETENCY_CHIP_STYLES` keyed by display name — silent grey fallback if competency name changes or is added; design tradeoff documented in spec; address if competency names become configurable (`sdd-app/src/renderer/src/views/Framework.tsx`)
+- `fontWeight: 'inherit'` on nav label Typography may not cascade from parent ListItemButton `sx` — selected state bold emphasis may be silently ineffective; verify in browser (`sdd-app/src/renderer/src/components/layout/Sidebar.tsx`)

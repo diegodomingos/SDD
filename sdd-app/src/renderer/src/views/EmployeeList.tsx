@@ -138,32 +138,30 @@ export default function EmployeeList(): React.JSX.Element {
 
   return (
     <Box>
+      {/* Page header — always visible */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: '#1A1A2E' }}>
+          Employees
+        </Typography>
+        <Button variant="contained" onClick={handleOpenDialog}>
+          + Add Employee
+        </Button>
+      </Box>
+
       {employees.length === 0 ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 2 }}>
           <Typography color="text.secondary">
             No employees yet — add your first one to get started
           </Typography>
-          <Button variant="contained" onClick={handleOpenDialog}>
-            + Add Employee
-          </Button>
         </Box>
       ) : (
         <>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <Button variant="contained" onClick={handleOpenDialog}>
-              + Add Employee
-            </Button>
-          </Box>
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>
-                    <Typography variant="subtitle2">Name</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="subtitle2">Level</Typography>
-                  </TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Level</TableCell>
                   <TableCell sx={{ width: 120 }} />
                 </TableRow>
               </TableHead>
@@ -229,8 +227,26 @@ export default function EmployeeList(): React.JSX.Element {
                       onMouseEnter={() => setHoveredId(emp.id)}
                       onMouseLeave={() => setHoveredId(null)}
                     >
-                      <TableCell>{emp.name}</TableCell>
-                      <TableCell>{emp.level}</TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>{emp.name}</TableCell>
+                      <TableCell>
+                        <Box
+                          component="span"
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 28,
+                            height: 28,
+                            borderRadius: '6px',
+                            bgcolor: '#EEF2FF',
+                            color: '#3B5BDB',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {emp.level}
+                        </Box>
+                      </TableCell>
                       <TableCell>
                         {hoveredId === emp.id && (
                           <>

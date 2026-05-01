@@ -50,6 +50,40 @@ const theme = createTheme({
       insufficientInput: '#E65100',
     },
   },
+  typography: {
+    fontFamily: [
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      'sans-serif',
+    ].join(','),
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          '& .MuiTableCell-root': {
+            fontSize: '11px',
+            fontWeight: 600,
+            color: '#9CA3AF',
+            backgroundColor: '#F9FAFB',
+            textTransform: 'uppercase',
+            letterSpacing: '0.6px',
+            padding: '12px 16px',
+            borderBottom: '1px solid #E5E7EB',
+          },
+        },
+      },
+    },
+  },
 })
 
 export default theme

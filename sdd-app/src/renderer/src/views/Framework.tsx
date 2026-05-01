@@ -5,15 +5,9 @@ import {
   Button,
   CircularProgress,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
 } from '@mui/material'
-import CheckIcon from '@mui/icons-material/Check'
 import CloseIcon from '@mui/icons-material/Close'
 import useFramework from '../hooks/useFramework'
 import type { CompetencyLevel } from '../../../shared/ipc-types'
@@ -21,6 +15,13 @@ import type { CompetencyLevel } from '../../../shared/ipc-types'
 const LEVELS: CompetencyLevel[] = ['A', 'B', 'C', 'D']
 
 type EditingCell = { competencyId: number; level: CompetencyLevel }
+
+const COMPETENCY_CHIP_STYLES: Record<string, { color: string; borderColor: string; bgcolor: string }> = {
+  Communication:  { color: '#2563EB', borderColor: '#93C5FD', bgcolor: '#EFF6FF' },
+  'Client Focus': { color: '#0D9488', borderColor: '#5EEAD4', bgcolor: '#F0FDFA' },
+  Proactivity:    { color: '#D97706', borderColor: '#FCD34D', bgcolor: '#FFFBEB' },
+  Teamwork:       { color: '#7C3AED', borderColor: '#C4B5FD', bgcolor: '#F5F3FF' },
+}
 
 export default function Framework(): React.JSX.Element {
   const { competencies, behaviors, isLoading, error, load, clearError, saveBehavior } = useFramework()
@@ -64,40 +65,121 @@ export default function Framework(): React.JSX.Element {
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>
+      <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: '#1A1A2E' }}>
         Competency Framework
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, mt: -0.5 }}>
+        Define the expected observable behaviors per competency and level. These are the standards used
+        by the AI to assess employees.
       </Typography>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
           {error}
         </Alert>
       )}
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell component="th" scope="col">
-              Competency
-            </TableCell>
-            {LEVELS.map((level) => (
-              <TableCell key={level} component="th" scope="col" align="center">
-                Level {level}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {competencies.map((comp) => (
-            <TableRow key={comp.id}>
-              <TableCell sx={{ fontWeight: 600, minWidth: 140 }}>{comp.name}</TableCell>
-              {LEVELS.map((level) => {
+      {competencies.map((comp) => {
+        const chipStyle = COMPETENCY_CHIP_STYLES[comp.name] ?? {
+          color: '#6B7280',
+          borderColor: '#E5E7EB',
+          bgcolor: '#F9FAFB',
+        }
+        const configuredCount = LEVELS.filter((l) => behaviors[comp.id]?.[l]).length
+
+        return (
+          <Box
+            key={comp.id}
+            sx={{
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              mb: 1.5,
+              overflow: 'hidden',
+            }}
+          >
+            {/* Card header */}
+            <Box
+              sx={{
+                px: 2.5,
+                py: 1.75,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                bgcolor: '#F9FAFB',
+              }}
+            >
+              <Box
+                component="span"
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  px: '10px',
+                  py: '2px',
+                  borderRadius: '12px',
+                  border: '1px solid',
+                  borderColor: chipStyle.borderColor,
+                  bgcolor: chipStyle.bgcolor,
+                  color: chipStyle.color,
+                  fontSize: '12px',
+                  fontWeight: 500,
+                }}
+              >
+                {comp.name}
+              </Box>
+              <Typography variant="caption" color="text.secondary">
+                {configuredCount} of {LEVELS.length} levels configured
+              </Typography>
+            </Box>
+
+            {/* Card body */}
+            <Box sx={{ px: 2.5, py: 2 }}>
+              {LEVELS.map((level, idx) => {
                 const description = behaviors[comp.id]?.[level] ?? null
                 const isEditing =
                   editingCell?.competencyId === comp.id && editingCell?.level === level
 
                 return (
-                  <TableCell key={level} align="left" sx={{ verticalAlign: 'top', minWidth: 200 }}>
-                    {isEditing ? (
-                      <Box>
+                  <Box
+                    key={level}
+                    sx={{
+                      display: 'flex',
+                      gap: 1.75,
+                      alignItems: 'flex-start',
+                      mb: idx < LEVELS.length - 1 ? 1.75 : 0,
+                      ...(isEditing && {
+                        bgcolor: '#F0F4FF',
+                        mx: -0.5,
+                        px: 0.5,
+                        py: 1,
+                        borderRadius: '6px',
+                      }),
+                    }}
+                  >
+                    {/* Level badge */}
+                    <Box
+                      sx={{
+                        flexShrink: 0,
+                        width: 28,
+                        height: 28,
+                        borderRadius: '6px',
+                        bgcolor: '#EEF2FF',
+                        color: '#3B5BDB',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        mt: '1px',
+                      }}
+                    >
+                      {level}
+                    </Box>
+
+                    {/* Description or textarea */}
+                    <Box sx={{ flex: 1 }}>
+                      {isEditing ? (
                         <TextField
                           multiline
                           fullWidth
@@ -106,57 +188,83 @@ export default function Framework(): React.JSX.Element {
                           onChange={(e) => setDraftText(e.target.value)}
                           autoFocus
                           onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                              cancelEdit()
-                            }
+                            if (e.key === 'Escape') cancelEdit()
                           }}
                         />
-                        <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5 }}>
-                          <IconButton
-                            size="small"
-                            aria-label="Save expected behavior"
-                            disabled={!draftText.trim()}
-                            sx={{ opacity: draftText.trim() ? 1 : 0.4 }}
-                            onClick={() => confirmSave(comp.id, level)}
-                          >
-                            <CheckIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            aria-label="Cancel edit"
-                            onClick={cancelEdit}
-                          >
-                            <CloseIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      </Box>
-                    ) : (
-                      <Box>
-                        {description ? (
-                          <Typography variant="body2" sx={{ mb: 0.5 }}>
-                            {description}
-                          </Typography>
-                        ) : (
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            (not configured)
-                          </Typography>
-                        )}
+                      ) : (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: description ? '#374151' : 'text.secondary',
+                            lineHeight: 1.55,
+                          }}
+                        >
+                          {description ?? 'not configured'}
+                        </Typography>
+                      )}
+                    </Box>
+
+                    {/* Action buttons */}
+                    {isEditing ? (
+                      <>
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => startEdit(comp.id, level, description)}
+                          onClick={() => { if (draftText.trim()) confirmSave(comp.id, level) }}
+                          sx={{
+                            flexShrink: 0,
+                            mt: '2px',
+                            fontSize: '12px',
+                            px: 1.5,
+                            py: 0.5,
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
+                            fontWeight: 500,
+                            opacity: draftText.trim() ? 1 : 0.4,
+                            pointerEvents: draftText.trim() ? 'auto' : 'none',
+                          }}
                         >
-                          Edit
+                          Save
                         </Button>
-                      </Box>
+                        <IconButton
+                          size="small"
+                          aria-label="Cancel edit"
+                          onClick={cancelEdit}
+                          sx={{ mt: '2px', flexShrink: 0 }}
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    ) : (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => startEdit(comp.id, level, description)}
+                        sx={{
+                          flexShrink: 0,
+                          mt: '2px',
+                          fontSize: '12px',
+                          px: 1.5,
+                          py: 0.5,
+                          borderColor: '#E5E7EB',
+                          color: '#6B7280',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
+                            bgcolor: 'transparent',
+                          },
+                        }}
+                      >
+                        Edit
+                      </Button>
                     )}
-                  </TableCell>
+                  </Box>
                 )
               })}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+            </Box>
+          </Box>
+        )
+      })}
     </Box>
   )
 }

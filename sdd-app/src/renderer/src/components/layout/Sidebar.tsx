@@ -1,12 +1,16 @@
-import { Box, List, ListItemButton, ListItemText, Typography } from '@mui/material'
+import { Box, List, ListItemButton, Typography } from '@mui/material'
 import { useAppStore } from '../../store/appStore'
 
-type NavItem = { label: string; view: 'employees' | 'framework' | 'settings' }
+type NavItem = {
+  label: string
+  view: 'employees' | 'framework' | 'settings'
+  icon: string
+}
 
 const navItems: NavItem[] = [
-  { label: 'Employees', view: 'employees' },
-  { label: 'Framework', view: 'framework' },
-  { label: 'Settings', view: 'settings' },
+  { label: 'Employees', view: 'employees', icon: '👥' },
+  { label: 'Framework', view: 'framework', icon: '📋' },
+  { label: 'Settings', view: 'settings', icon: '⚙️' },
 ]
 
 export default function Sidebar(): React.JSX.Element {
@@ -24,38 +28,97 @@ export default function Sidebar(): React.JSX.Element {
         borderColor: 'divider',
         display: 'flex',
         flexDirection: 'column',
-        p: 2,
-        gap: 1,
       }}
     >
-      <Typography variant="subtitle2" sx={{ fontWeight: 600 }} color="text.primary">
-        Employee Evaluation Tool
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        Manager
-      </Typography>
-      <List disablePadding sx={{ mt: 1 }}>
-        {navItems.map(({ label, view }) => (
+      {/* Logo area */}
+      <Box
+        sx={{
+          px: 2,
+          pt: '18px',
+          pb: '14px',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'primary.main',
+            lineHeight: 1.4,
+            letterSpacing: '0.1px',
+          }}
+        >
+          Employee Evaluation Tool
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: '11px',
+            fontWeight: 400,
+            color: '#9CA3AF',
+            mt: '3px',
+          }}
+        >
+          Manager
+        </Typography>
+      </Box>
+
+      {/* Nav items */}
+      <List disablePadding sx={{ pt: 1, pb: 1, flex: 1 }}>
+        {navItems.map(({ label, view, icon }) => (
           <ListItemButton
             key={view}
             selected={currentView === view}
             onClick={() => setView(view)}
             sx={{
-              borderRadius: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.25,
+              px: 2,
+              py: '10px',
+              color: '#6B7280',
               borderLeft: '3px solid transparent',
+              borderRadius: 0,
               '&.Mui-selected': {
+                bgcolor: '#EEF2FF',
+                color: 'primary.main',
+                fontWeight: 500,
                 borderLeftColor: 'primary.main',
-                bgcolor: 'action.selected',
               },
               '&.Mui-selected:hover': {
-                bgcolor: 'action.selected',
+                bgcolor: '#EEF2FF',
+              },
+              '&:hover:not(.Mui-selected)': {
+                bgcolor: '#F9FAFB',
+                color: '#1A1A2E',
               },
             }}
           >
-            <ListItemText primary={label} />
+            <Box
+              component="span"
+              aria-hidden="true"
+              sx={{ width: 18, textAlign: 'center', fontSize: '15px', flexShrink: 0, lineHeight: 1 }}
+            >
+              {icon}
+            </Box>
+            <Typography sx={{ fontSize: '14px', color: 'inherit', fontWeight: 'inherit' }}>
+              {label}
+            </Typography>
           </ListItemButton>
         ))}
       </List>
+
+      {/* Footer */}
+      <Box
+        sx={{
+          px: 2,
+          py: '12px',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Typography sx={{ fontSize: '11px', color: '#9CA3AF' }}>v1.0.0 · PoC</Typography>
+      </Box>
     </Box>
   )
 }

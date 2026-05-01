@@ -530,6 +530,36 @@ So that the system has the comparison baseline it needs to generate meaningful A
 
 ---
 
+### Story 3.3: UX Polish — Framework Layout and App Shell Visual Alignment
+
+As a manager,
+I want the application to visually match the approved UX mockups,
+so that the interface looks polished and professional, and the framework view is intuitive to navigate.
+
+**Acceptance Criteria:**
+
+**Given** the Framework view renders
+**When** the user navigates to Framework
+**Then** each competency is displayed as a standalone card section (not a table grid) with: a `#F9FAFB` header showing a colored outlined chip + "X of 4 levels configured" count; and a body listing 4 level rows (level badge + description text + Edit button)
+
+**Given** the Framework page renders
+**When** the heading is visible
+**Then** a subtitle paragraph appears below the title: "Define the expected observable behaviors per competency and level. These are the standards used by the AI to assess employees."
+
+**Given** a level row is in edit mode
+**When** the user edits a behavior
+**Then** the row background becomes `#F0F4FF`, the description is replaced by a textarea, the action button changes to a text "Save" button (blue outlined, 40% opacity when draft empty), and a ✕ cancel IconButton is present; Escape cancels; no success toast on save
+
+**Given** the sidebar renders
+**When** any screen is active
+**Then** the app name "Employee Evaluation Tool" is in primary blue; a border-bottom separates the logo area from the nav; each nav item includes an icon (Employees → People, Framework → ListAlt, Settings → Settings); and a footer "v1.0.0 · PoC" with border-top is visible at the bottom
+
+**Given** the Employee List view renders
+**When** employees exist or the list is empty
+**Then** a page header is always visible with "Employees" title (20px/600) on the left and "+ Add Employee" button on the right; employee level is rendered as a 28×28px styled badge (#EEF2FF background, #3B5BDB text, 6px border-radius)
+
+---
+
 ## Epic 4: Behavior Logging
 
 Manager can log observed behaviors (free-text, multi-competency tagged, dated including retroactive), view and filter the behavior log per employee per competency, and edit or delete entries. The evidence base for AI evaluation is fully operational.
