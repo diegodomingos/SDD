@@ -70,3 +70,38 @@ export function listEntries(
   }
   return groupJoinRows(rows)
 }
+
+export function createEntry(
+  db: Database.Database,
+  employeeId: number,
+  description: string,
+  competencyIds: number[],
+  entryDate: string
+): BehaviorLogEntry {
+  const insertEntry = db.prepare(
+    'INSERT INTO behavior_log_entries (employee_id, description, entry_date) VALUES (?, ?, ?)'
+  )
+  const insertJunction = db.prepare(
+    'INSERT INTO behavior_log_entry_competencies (entry_id, competency_id) VALUES (?, ?)'
+  )
+  const fetchEntry = db.prepare(
+    `${BASE_SELECT} WHERE e.id = ?`
+  )
+
+  const run = db.transaction((): number => {
+    const { lastInsertRowid } = insertEntry.run(employeeId, description, entryDate)
+    const entryId = Number(lastInsertRowid)
+    for (const competencyId of competencyIds) {
+      insertJunction.run(entryId, competencyId)
+    }
+    return entryId
+  })
+
+  const entryId = run()
+  const rows = fetchEntry.all(entryId) as JoinRow[]
+  const created = groupJoinRows(rows)
+  if (created.length === 0) {
+    throw new Error(`createEntry: no row found after insert (id=${entryId})`)
+  }
+  return created[0]
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Box,
@@ -18,19 +18,30 @@ import {
   Typography,
 } from '@mui/material'
 import CompetencyChip from '../components/common/CompetencyChip'
+import InlineLogRow from '../components/log/InlineLogRow'
 import { useAppStore } from '../store/appStore'
 import { useBehaviorLog } from '../hooks/useBehaviorLog'
 
 export default function EmployeeDetail(): React.JSX.Element {
   const employee = useAppStore((s) => s.selectedEmployee)!
   const setEmployee = useAppStore((s) => s.setEmployee)
-  const { entries, isLoading, error, load } = useBehaviorLog()
+  const { entries, competencies, isLoading, error, load, loadCompetencies, create } = useBehaviorLog()
   const [activeTab, setActiveTab] = useState(0)
-  const [showInlineRow, setShowInlineRow] = useState(false) // wired to InlineLogRow in Story 4.2
+  const [showInlineRow, setShowInlineRow] = useState(false)
 
   useEffect(() => {
     load(employee.id)
-  }, [load, employee.id])
+    loadCompetencies()
+  }, [load, loadCompetencies, employee.id])
+
+  const handleSave = useCallback(
+    async (description: string, competencyIds: number[], entryDate: string): Promise<boolean> => {
+      const ok = await create({ employeeId: employee.id, description, competencyIds, entryDate })
+      if (ok) setShowInlineRow(false)
+      return ok
+    },
+    [create, employee.id]
+  )
 
   return (
     <Box>
@@ -86,11 +97,14 @@ export default function EmployeeDetail(): React.JSX.Element {
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <CircularProgress />
             </Box>
-          ) : entries.length === 0 ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 1 }}>
+          ) : entries.length === 0 && !showInlineRow ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 2 }}>
               <Typography color="text.secondary">
                 No behaviors logged for {employee.name} yet
               </Typography>
+              <Button variant="contained" onClick={() => setShowInlineRow(true)}>
+                + Log Behavior
+              </Button>
             </Box>
           ) : (
             <TableContainer component={Paper}>
@@ -109,6 +123,13 @@ export default function EmployeeDetail(): React.JSX.Element {
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                  {showInlineRow && (
+                    <InlineLogRow
+                      competencies={competencies}
+                      onSave={handleSave}
+                      onCancel={() => setShowInlineRow(false)}
+                    />
+                  )}
                   {entries.map((entry) => (
                     <TableRow key={entry.id}>
                       <TableCell sx={{ verticalAlign: 'top', color: 'text.secondary', fontSize: '13px' }}>
@@ -132,9 +153,6 @@ export default function EmployeeDetail(): React.JSX.Element {
           )}
         </>
       )}
-
-      {/* showInlineRow used by Story 4.2 — suppress unused-var lint */}
-      {showInlineRow && null}
     </Box>
   )
 }

@@ -137,3 +137,10 @@
 - Sidebar "Employees" nav resurfaces EmployeeDetail without resetting selection — explicitly documented as acceptable in Story 4.1 dev notes; "Employees" breadcrumb link is the intended back-navigation path (`sdd-app/src/renderer/src/App.tsx`)
 - `showInlineRow && null` renders nothing — intentional placeholder; Story 4.2 wires InlineLogRow using this state (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
 - Evaluate tab placeholder text `"AI evaluation — coming in Epic 6."` deviates from spec `"Coming in Epic 6"` — not relevant; Epic 6 will replace the placeholder entirely (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+
+## Deferred from: code review of 4-2-inline-behavior-log-entry-creation (2026-05-02)
+
+- Two "Log Behavior" buttons (header + empty state) visible simultaneously when entries exist — spec-compliant; header button pre-exists from Story 4.1 (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx:85`)
+- Optimistic prepend puts past-dated entries above newer entries until next reload — spec-mandated "prepend so it appears immediately at top" behavior; sort order corrects on next `load()` (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:37`)
+- `competencyIds` element type/FK validation not done in handler — internal IPC only; SQLite transaction rollback handles invalid IDs correctly; generic error message sufficient for single-user desktop (`sdd-app/src/main/handlers/behaviorLogHandlers.ts:37`)
+- `mockDbForCreate` mock returns same `lastInsertRowid` for all `run()` calls — cannot distinguish entry vs junction insert rowid; test quality improvement only, not a correctness bug (`sdd-app/__tests__/main/db/behaviorLog.test.ts:16`)

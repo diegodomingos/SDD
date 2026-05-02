@@ -9,7 +9,7 @@ import type {
   DeleteBehaviorLogPayload
 } from '../../shared/ipc-types'
 import { db } from '../db/database'
-import { listEntries } from '../db/behaviorLog'
+import { listEntries, createEntry } from '../db/behaviorLog'
 
 export function registerBehaviorLogHandlers(): void {
   ipcMain.handle(
@@ -29,9 +29,25 @@ export function registerBehaviorLogHandlers(): void {
   ipcMain.handle(
     'behavior-log:create',
     async (_event, payload: CreateBehaviorLogPayload): Promise<IpcResult<BehaviorLogEntry>> => {
-      log.info('[behavior-log:create] employeeId=%d', payload.employeeId)
+      log.info('[behavior-log:create] employeeId=%d competencyIds=%j', payload.employeeId, payload.competencyIds)
       try {
-        return { ok: false, error: 'Not implemented.' }
+        if (!payload.description?.trim()) {
+          return { ok: false, error: 'Description is required.' }
+        }
+        if (!Array.isArray(payload.competencyIds) || payload.competencyIds.length === 0) {
+          return { ok: false, error: 'At least one competency must be selected.' }
+        }
+        if (!payload.entryDate || !/^\d{4}-\d{2}-\d{2}$/.test(payload.entryDate)) {
+          return { ok: false, error: 'A valid date is required.' }
+        }
+        const entry = createEntry(
+          db!,
+          payload.employeeId,
+          payload.description.trim(),
+          payload.competencyIds,
+          payload.entryDate
+        )
+        return { ok: true, data: entry }
       } catch (e) {
         log.error('[behavior-log:create] error: %s', e instanceof Error ? e.message : String(e))
         return { ok: false, error: 'Failed to create behavior log entry.' }

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-05-01 # story 4-1 done
+last_updated: 2026-05-02 # story 4-2 done
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -70,7 +70,7 @@ development_status:
   # ── Epic 4: Behavior Logging ───────────────────────────────────────────────
   epic-4: in-progress
   4-1-behavior-log-list-view: done
-  4-2-inline-behavior-log-entry-creation: backlog
+  4-2-inline-behavior-log-entry-creation: done
   4-3-filter-log-entries-by-competency: backlog
   4-4-edit-and-delete-behavior-log-entries: backlog
   epic-4-retrospective: optional
