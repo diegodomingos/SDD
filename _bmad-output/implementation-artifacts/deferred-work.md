@@ -145,6 +145,13 @@
 - `competencyIds` element type/FK validation not done in handler — internal IPC only; SQLite transaction rollback handles invalid IDs correctly; generic error message sufficient for single-user desktop (`sdd-app/src/main/handlers/behaviorLogHandlers.ts:37`)
 - `mockDbForCreate` mock returns same `lastInsertRowid` for all `run()` calls — cannot distinguish entry vs junction insert rowid; test quality improvement only, not a correctness bug (`sdd-app/__tests__/main/db/behaviorLog.test.ts:16`)
 
+## Deferred from: code review of 4-4-edit-and-delete-behavior-log-entries (2026-05-02)
+
+- `updateEntry` has no cross-employee ownership check — `WHERE id = ?` without `AND employee_id = ?`; acceptable in single-user Electron desktop; address if multi-user or remote-IPC scenarios are introduced (`sdd-app/src/main/db/behaviorLog.ts`)
+- `initialDate` prop changes after mount are ignored by `useState` — fragile component contract if `editingEntryId` switches without unmounting; current usage mounts a fresh key so not triggered (`sdd-app/src/renderer/src/components/log/InlineLogRow.tsx`)
+- `handleSave` calls `load()` without `await` before dismissing inline row — error from re-fetch surfaces after row is already gone; pre-existing pattern from Story 4.2 (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- `InlineLogRow` `saving` stuck `true` permanently if parent does not unmount after successful save — `setSaving(false)` only called on failure; relies on parent always unmounting on success (`sdd-app/src/renderer/src/components/log/InlineLogRow.tsx`)
+
 ## Deferred from: code review of 4-3-filter-log-entries-by-competency (2026-05-02)
 
 - `load`'s `setError(null)` silently clears concurrent `loadCompetencies` errors — two independent useEffects fire on mount; if `loadCompetencies` sets an error, the near-simultaneous `load()` call's `setError(null)` clears it before render; pre-existing hook design (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:12`)

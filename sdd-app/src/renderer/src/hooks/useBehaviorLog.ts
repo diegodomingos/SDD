@@ -50,7 +50,47 @@ export function useBehaviorLog() {
     }
   }, [])
 
+  const update = useCallback(
+    async (id: number, description: string, competencyIds: number[], entryDate: string): Promise<boolean> => {
+      setError(null)
+      try {
+        const result = await window.electronAPI.invoke<BehaviorLogEntry>('behavior-log:update', {
+          id,
+          description,
+          competencyIds,
+          entryDate,
+        })
+        if (result.ok) {
+          setEntries((prev) => prev.map((e) => (e.id === id ? result.data : e)))
+          return true
+        }
+        setError(result.error)
+        return false
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Unexpected error')
+        return false
+      }
+    },
+    []
+  )
+
+  const remove = useCallback(async (id: number): Promise<boolean> => {
+    setError(null)
+    try {
+      const result = await window.electronAPI.invoke<null>('behavior-log:delete', { id })
+      if (result.ok) {
+        setEntries((prev) => prev.filter((e) => e.id !== id))
+        return true
+      }
+      setError(result.error)
+      return false
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unexpected error')
+      return false
+    }
+  }, [])
+
   const clearError = useCallback(() => setError(null), [])
 
-  return { entries, competencies, isLoading, error, load, loadCompetencies, create, clearError }
+  return { entries, competencies, isLoading, error, load, loadCompetencies, create, update, remove, clearError }
 }

@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3'
 import { describe, it, expect } from 'vitest'
-import { listEntries, createEntry } from '../../../src/main/db/behaviorLog'
+import { listEntries, createEntry, updateEntry, deleteEntry } from '../../../src/main/db/behaviorLog'
 
 // Minimal mock: simulates better-sqlite3 prepare().all() without the native module.
 // Electron compiles better-sqlite3 against its own Node.js (ABI 140); Vitest runs on
@@ -201,5 +201,87 @@ describe('createEntry', () => {
     } as unknown as Database.Database
     createEntry(db, 1, 'Y', [], '2026-05-01')
     expect(transactionCalled).toBe(true)
+  })
+})
+
+// Supports transaction() + prepare() returning both run() and all()
+function mockDbForUpdate(fetchRows: object[]): Database.Database {
+  return {
+    prepare: (_sql: string) => ({
+      run: (..._args: unknown[]) => ({ changes: 1 }),
+      all: (..._args: unknown[]) => fetchRows,
+    }),
+    transaction: (fn: (...args: unknown[]) => unknown) => (...args: unknown[]) => fn(...args),
+  } as unknown as Database.Database
+}
+
+describe('updateEntry', () => {
+  it('wraps in a transaction', () => {
+    const fetchRows = [
+      { id: 1, employee_id: 1, description: 'Updated', entry_date: '2026-05-01', created_at: '2026-05-01', comp_id: null, comp_name: null },
+    ]
+    let transactionCalled = false
+    const db = {
+      prepare: (_sql: string) => ({
+        run: (..._args: unknown[]) => ({ changes: 1 }),
+        all: (..._args: unknown[]) => fetchRows,
+      }),
+      transaction: (fn: (...args: unknown[]) => unknown) => {
+        transactionCalled = true
+        return (...args: unknown[]) => fn(...args)
+      },
+    } as unknown as Database.Database
+    updateEntry(db, 1, 'Updated', [], '2026-05-01')
+    expect(transactionCalled).toBe(true)
+  })
+
+  it('returns updated entry with camelCase shape', () => {
+    const fetchRows = [
+      { id: 5, employee_id: 2, description: 'Revised', entry_date: '2026-05-02', created_at: '2026-05-01', comp_id: 1, comp_name: 'Communication' },
+    ]
+    const db = mockDbForUpdate(fetchRows)
+    const entry = updateEntry(db, 5, 'Revised', [1], '2026-05-02')
+    expect(entry.id).toBe(5)
+    expect(entry.description).toBe('Revised')
+    expect(entry.entryDate).toBe('2026-05-02')
+    expect(entry.competencies).toHaveLength(1)
+    expect(entry.competencies[0]).toEqual({ id: 1, name: 'Communication' })
+    expect((entry as any).employee_id).toBeUndefined()
+  })
+
+  it('returns entry with no competencies when updated with empty array', () => {
+    const fetchRows = [
+      { id: 3, employee_id: 1, description: 'No tag', entry_date: '2026-05-01', created_at: '2026-05-01', comp_id: null, comp_name: null },
+    ]
+    const db = mockDbForUpdate(fetchRows)
+    const entry = updateEntry(db, 3, 'No tag', [], '2026-05-01')
+    expect(entry.competencies).toEqual([])
+  })
+})
+
+describe('deleteEntry', () => {
+  it('calls run() on the DELETE statement', () => {
+    let runCalled = false
+    const db = {
+      prepare: (_sql: string) => ({
+        run: (..._args: unknown[]) => { runCalled = true; return { changes: 1 } },
+      }),
+    } as unknown as Database.Database
+    deleteEntry(db, 42)
+    expect(runCalled).toBe(true)
+  })
+
+  it('returns true when a row is deleted', () => {
+    const db = {
+      prepare: (_sql: string) => ({ run: (..._args: unknown[]) => ({ changes: 1 }) }),
+    } as unknown as Database.Database
+    expect(deleteEntry(db, 1)).toBe(true)
+  })
+
+  it('returns false when no row is deleted', () => {
+    const db = {
+      prepare: (_sql: string) => ({ run: (..._args: unknown[]) => ({ changes: 0 }) }),
+    } as unknown as Database.Database
+    expect(deleteEntry(db, 999)).toBe(false)
   })
 })

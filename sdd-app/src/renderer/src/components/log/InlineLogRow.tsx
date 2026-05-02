@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import CompetencyChip from '../common/CompetencyChip'
 import type { Competency } from '../../../../shared/ipc-types'
 
@@ -13,12 +13,15 @@ interface InlineLogRowProps {
   competencies: Competency[]
   onSave: (description: string, competencyIds: number[], entryDate: string) => Promise<boolean>
   onCancel: () => void
+  initialDescription?: string
+  initialCompetencyIds?: number[]
+  initialDate?: string // ISO-8601 date e.g. '2026-04-25'
 }
 
-export default function InlineLogRow({ competencies, onSave, onCancel }: InlineLogRowProps): React.JSX.Element {
-  const [date, setDate] = useState<Date | null>(new Date())
-  const [description, setDescription] = useState('')
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+export default function InlineLogRow({ competencies, onSave, onCancel, initialDescription, initialCompetencyIds, initialDate }: InlineLogRowProps): React.JSX.Element {
+  const [date, setDate] = useState<Date | null>(initialDate ? parseISO(initialDate) : new Date())
+  const [description, setDescription] = useState(initialDescription ?? '')
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set(initialCompetencyIds ?? []))
   const [saving, setSaving] = useState(false)
   const savingRef = useRef(false)
 

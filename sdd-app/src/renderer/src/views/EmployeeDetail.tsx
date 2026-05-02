@@ -5,6 +5,7 @@ import {
   Breadcrumbs,
   Button,
   CircularProgress,
+  IconButton,
   Link,
   Paper,
   Tab,
@@ -17,6 +18,8 @@ import {
   Tabs,
   Typography,
 } from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 import CompetencyChip from '../components/common/CompetencyChip'
 import InlineLogRow from '../components/log/InlineLogRow'
 import { useAppStore } from '../store/appStore'
@@ -25,10 +28,12 @@ import { useBehaviorLog } from '../hooks/useBehaviorLog'
 export default function EmployeeDetail(): React.JSX.Element {
   const employee = useAppStore((s) => s.selectedEmployee)!
   const setEmployee = useAppStore((s) => s.setEmployee)
-  const { entries, competencies, isLoading, error, load, loadCompetencies, create } = useBehaviorLog()
+  const { entries, competencies, isLoading, error, load, loadCompetencies, create, update, remove } = useBehaviorLog()
   const [activeTab, setActiveTab] = useState(0)
   const [showInlineRow, setShowInlineRow] = useState(false)
   const [selectedCompetencyId, setSelectedCompetencyId] = useState<number | null>(null)
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null)
 
   // Load competencies once on mount
   useEffect(() => {
@@ -56,6 +61,22 @@ export default function EmployeeDetail(): React.JSX.Element {
       return ok
     },
     [create, employee.id, selectedCompetencyId, load]
+  )
+
+  const handleSaveEdit = useCallback(
+    async (id: number, description: string, competencyIds: number[], entryDate: string): Promise<boolean> => {
+      const ok = await update(id, description, competencyIds, entryDate)
+      if (ok) setEditingEntryId(null)
+      return ok
+    },
+    [update]
+  )
+
+  const handleDelete = useCallback(
+    async (id: number) => {
+      await remove(id)
+    },
+    [remove]
   )
 
   return (
@@ -97,7 +118,11 @@ export default function EmployeeDetail(): React.JSX.Element {
             <Typography variant="h6" sx={{ fontWeight: 600, color: '#1A1A2E' }}>
               Behavior Log
             </Typography>
-            <Button variant="contained" onClick={() => setShowInlineRow(true)}>
+            <Button
+              variant="contained"
+              onClick={() => setShowInlineRow(true)}
+              disabled={editingEntryId !== null}
+            >
               + Log Behavior
             </Button>
           </Box>
@@ -154,6 +179,7 @@ export default function EmployeeDetail(): React.JSX.Element {
                     <TableCell component="th" scope="col" sx={{ width: 280 }}>
                       Competencies
                     </TableCell>
+                    <TableCell sx={{ width: 80 }} />
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -164,23 +190,61 @@ export default function EmployeeDetail(): React.JSX.Element {
                       onCancel={() => setShowInlineRow(false)}
                     />
                   )}
-                  {entries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell sx={{ verticalAlign: 'top', color: 'text.secondary', fontSize: '13px' }}>
-                        {entry.entryDate}
-                      </TableCell>
-                      <TableCell sx={{ verticalAlign: 'top', fontSize: '14px', whiteSpace: 'pre-wrap' }}>
-                        {entry.description}
-                      </TableCell>
-                      <TableCell sx={{ verticalAlign: 'top' }}>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {entry.competencies.map((c) => (
-                            <CompetencyChip key={c.id} competency={c} mode="read-only" />
-                          ))}
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {entries.map((entry) =>
+                    editingEntryId === entry.id ? (
+                      <InlineLogRow
+                        key={entry.id}
+                        competencies={competencies}
+                        initialDescription={entry.description}
+                        initialCompetencyIds={entry.competencies.map((c) => c.id)}
+                        initialDate={entry.entryDate}
+                        onSave={(desc, ids, date) => handleSaveEdit(entry.id, desc, ids, date)}
+                        onCancel={() => setEditingEntryId(null)}
+                      />
+                    ) : (
+                      <TableRow
+                        key={entry.id}
+                        onMouseEnter={() => setHoveredId(entry.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                      >
+                        <TableCell sx={{ verticalAlign: 'top', color: 'text.secondary', fontSize: '13px' }}>
+                          {entry.entryDate}
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: 'top', fontSize: '14px', whiteSpace: 'pre-wrap' }}>
+                          {entry.description}
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: 'top' }}>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {entry.competencies.map((c) => (
+                              <CompetencyChip key={c.id} competency={c} mode="read-only" />
+                            ))}
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ verticalAlign: 'top', width: 80 }}>
+                          {hoveredId === entry.id && (
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <IconButton
+                                aria-label="Edit log entry"
+                                size="small"
+                                sx={{ minWidth: 40, minHeight: 40 }}
+                                onClick={() => { setShowInlineRow(false); setHoveredId(null); setEditingEntryId(entry.id) }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                aria-label="Delete log entry"
+                                size="small"
+                                sx={{ minWidth: 40, minHeight: 40 }}
+                                onClick={() => handleDelete(entry.id)}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>

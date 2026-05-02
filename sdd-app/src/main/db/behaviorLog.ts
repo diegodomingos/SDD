@@ -105,3 +105,41 @@ export function createEntry(
   }
   return created[0]
 }
+
+export function updateEntry(
+  db: Database.Database,
+  id: number,
+  description: string,
+  competencyIds: number[],
+  entryDate: string
+): BehaviorLogEntry {
+  const updateStmt = db.prepare(
+    'UPDATE behavior_log_entries SET description = ?, entry_date = ? WHERE id = ?'
+  )
+  const deleteJunctions = db.prepare(
+    'DELETE FROM behavior_log_entry_competencies WHERE entry_id = ?'
+  )
+  const insertJunction = db.prepare(
+    'INSERT INTO behavior_log_entry_competencies (entry_id, competency_id) VALUES (?, ?)'
+  )
+  const fetchEntry = db.prepare(`${BASE_SELECT} WHERE e.id = ?`)
+
+  const run = db.transaction(() => {
+    updateStmt.run(description, entryDate, id)
+    deleteJunctions.run(id)
+    for (const competencyId of competencyIds) {
+      insertJunction.run(id, competencyId)
+    }
+  })
+  run()
+
+  const rows = fetchEntry.all(id) as JoinRow[]
+  const updated = groupJoinRows(rows)
+  if (updated.length === 0) throw new Error(`updateEntry: no row found after update (id=${id})`)
+  return updated[0]
+}
+
+export function deleteEntry(db: Database.Database, id: number): boolean {
+  const result = db.prepare('DELETE FROM behavior_log_entries WHERE id = ?').run(id)
+  return result.changes > 0
+}
