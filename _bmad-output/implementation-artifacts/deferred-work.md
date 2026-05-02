@@ -152,6 +152,13 @@
 - `handleSave` calls `load()` without `await` before dismissing inline row — error from re-fetch surfaces after row is already gone; pre-existing pattern from Story 4.2 (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
 - `InlineLogRow` `saving` stuck `true` permanently if parent does not unmount after successful save — `setSaving(false)` only called on failure; relies on parent always unmounting on success (`sdd-app/src/renderer/src/components/log/InlineLogRow.tsx`)
 
+## Deferred from: code review of 5-1-settings-view-with-manager-display-name (2026-05-02)
+
+- `load()` not cancellation-safe on component unmount — local state setters fire on a dead component instance; pre-existing pattern across all hooks (`sdd-app/src/renderer/src/hooks/useSettings.ts`)
+- No max length validation on manager name — unbounded string passes through to SQLite; sidebar Typography has no overflow/truncation styling; address in a UI hardening story (`sdd-app/src/main/handlers/settingsHandlers.ts`, `sdd-app/src/renderer/src/components/layout/Sidebar.tsx`)
+- Whitespace-only name sends empty string to backend — handler correctly rejects it but the field visually shows spaces, making the error confusing; consider disabling Save when `draftName.trim() === ''` (`sdd-app/src/renderer/src/views/Settings.tsx`)
+- Sidebar `load()` fires on every remount — rewrites `storedName` in Zustand, which shifts Settings' `isDirty` computation mid-edit; low risk in practice (SQLite read returns current value), but fragile if save-then-remount race occurs (`sdd-app/src/renderer/src/components/layout/Sidebar.tsx`)
+
 ## Deferred from: code review of 4-3-filter-log-entries-by-competency (2026-05-02)
 
 - `load`'s `setError(null)` silently clears concurrent `loadCompetencies` errors — two independent useEffects fire on mount; if `loadCompetencies` sets an error, the near-simultaneous `load()` call's `setError(null)` clears it before render; pre-existing hook design (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:12`)

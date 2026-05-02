@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Box, List, ListItemButton, Typography } from '@mui/material'
 import { useAppStore } from '../../store/appStore'
+import { useSettings } from '../../hooks/useSettings'
 
 type NavItem = {
   label: string
@@ -16,6 +18,12 @@ const navItems: NavItem[] = [
 export default function Sidebar(): React.JSX.Element {
   const currentView = useAppStore((s) => s.currentView)
   const setView = useAppStore((s) => s.setView)
+  const managerName = useAppStore((s) => s.managerName)
+  const { load } = useSettings()
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   return (
     <Box
@@ -59,7 +67,7 @@ export default function Sidebar(): React.JSX.Element {
             mt: '3px',
           }}
         >
-          Manager
+          {managerName || 'Manager'}
         </Typography>
       </Box>
 

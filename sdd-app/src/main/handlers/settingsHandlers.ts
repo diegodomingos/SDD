@@ -1,12 +1,16 @@
 import { ipcMain } from 'electron'
 import log from 'electron-log/main'
 import type { IpcResult, SetApiKeyPayload, SetModelPayload, SetManagerNamePayload } from '../../shared/ipc-types'
+import { db } from '../db/database'
+import { getManagerName, setManagerName } from '../settings/modelPreference'
 
 export function registerSettingsHandlers(): void {
   ipcMain.handle('settings:get-manager-name', async (): Promise<IpcResult<string>> => {
     log.info('[settings:get-manager-name]')
     try {
-      return { ok: true, data: '' }
+      if (!db) return { ok: false, error: 'Database not ready.' }
+      const name = getManagerName(db)
+      return { ok: true, data: name }
     } catch (e) {
       log.error('[settings:get-manager-name] error: %s', e instanceof Error ? e.message : String(e))
       return { ok: false, error: 'Failed to get manager name.' }
@@ -17,9 +21,11 @@ export function registerSettingsHandlers(): void {
     'settings:set-manager-name',
     async (_event, payload: SetManagerNamePayload): Promise<IpcResult<null>> => {
       log.info('[settings:set-manager-name]')
-      void payload
       try {
-        return { ok: false, error: 'Not implemented.' }
+        if (!payload.name?.trim()) return { ok: false, error: 'Manager name is required.' }
+        if (!db) return { ok: false, error: 'Database not ready.' }
+        setManagerName(db, payload.name.trim())
+        return { ok: true, data: null }
       } catch (e) {
         log.error('[settings:set-manager-name] error: %s', e instanceof Error ? e.message : String(e))
         return { ok: false, error: 'Failed to set manager name.' }
