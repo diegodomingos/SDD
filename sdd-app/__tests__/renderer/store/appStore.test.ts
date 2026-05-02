@@ -1,8 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useAppStore } from '../../../src/renderer/src/store/appStore'
+import type { Employee } from '../../../src/shared/ipc-types'
+
+const mockEmployee: Employee = { id: 42, name: 'Alice', level: 'A', createdAt: '2026-01-01' }
+const anotherEmployee: Employee = { id: 5, name: 'Bob', level: 'B', createdAt: '2026-01-01' }
 
 beforeEach(() => {
-  useAppStore.setState({ currentView: 'employees', selectedEmployeeId: null, selectedCompetency: null })
+  useAppStore.setState({ currentView: 'employees', selectedEmployee: null, selectedCompetency: null })
 })
 
 describe('appStore', () => {
@@ -20,17 +24,18 @@ describe('appStore', () => {
     expect(useAppStore.getState().currentView).toBe('settings')
   })
 
-  it('setEmployee sets selectedEmployeeId and clears selectedCompetency', () => {
+  it('setEmployee sets selectedEmployee and clears selectedCompetency', () => {
     useAppStore.setState({ selectedCompetency: { id: 1, name: 'Communication' } })
-    useAppStore.getState().setEmployee(42)
-    expect(useAppStore.getState().selectedEmployeeId).toBe(42)
+    useAppStore.getState().setEmployee(mockEmployee)
+    expect(useAppStore.getState().selectedEmployee?.id).toBe(42)
+    expect(useAppStore.getState().selectedEmployee?.name).toBe('Alice')
     expect(useAppStore.getState().selectedCompetency).toBeNull()
   })
 
-  it('setEmployee with null clears selectedEmployeeId and selectedCompetency', () => {
-    useAppStore.setState({ selectedEmployeeId: 5, selectedCompetency: { id: 2, name: 'Teamwork' } })
+  it('setEmployee with null clears selectedEmployee and selectedCompetency', () => {
+    useAppStore.setState({ selectedEmployee: anotherEmployee, selectedCompetency: { id: 2, name: 'Teamwork' } })
     useAppStore.getState().setEmployee(null)
-    expect(useAppStore.getState().selectedEmployeeId).toBeNull()
+    expect(useAppStore.getState().selectedEmployee).toBeNull()
     expect(useAppStore.getState().selectedCompetency).toBeNull()
   })
 
@@ -39,8 +44,8 @@ describe('appStore', () => {
     expect(useAppStore.getState().selectedCompetency).toEqual({ id: 3, name: 'Proactivity' })
   })
 
-  it('initial selectedEmployeeId is null', () => {
-    expect(useAppStore.getState().selectedEmployeeId).toBeNull()
+  it('initial selectedEmployee is null', () => {
+    expect(useAppStore.getState().selectedEmployee).toBeNull()
   })
 
   it('initial selectedCompetency is null', () => {

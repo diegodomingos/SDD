@@ -31,9 +31,11 @@ import EditIcon from '@mui/icons-material/Edit'
 import type { SelectChangeEvent } from '@mui/material'
 import type { CompetencyLevel, Employee } from '../../../shared/ipc-types'
 import { useEmployees } from '../hooks/useEmployees'
+import { useAppStore } from '../store/appStore'
 
 export default function EmployeeList(): React.JSX.Element {
   const { employees, isLoading, error, load, create, update, remove, clearError } = useEmployees()
+  const setEmployee = useAppStore((s) => s.setEmployee)
 
   // Add Employee dialog state
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -227,7 +229,16 @@ export default function EmployeeList(): React.JSX.Element {
                       onMouseEnter={() => setHoveredId(emp.id)}
                       onMouseLeave={() => setHoveredId(null)}
                     >
-                      <TableCell sx={{ fontWeight: 500 }}>{emp.name}</TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          '&:hover': { color: 'primary.main' },
+                        }}
+                        onClick={() => setEmployee(emp)}
+                      >
+                        {emp.name}
+                      </TableCell>
                       <TableCell>
                         <Box
                           component="span"

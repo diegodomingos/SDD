@@ -8,14 +8,17 @@ import type {
   UpdateBehaviorLogPayload,
   DeleteBehaviorLogPayload
 } from '../../shared/ipc-types'
+import { db } from '../db/database'
+import { listEntries } from '../db/behaviorLog'
 
 export function registerBehaviorLogHandlers(): void {
   ipcMain.handle(
     'behavior-log:list',
     async (_event, payload: ListBehaviorLogPayload): Promise<IpcResult<BehaviorLogEntry[]>> => {
-      log.info('[behavior-log:list] employeeId=%d', payload.employeeId)
+      log.info('[behavior-log:list] employeeId=%d competencyId=%s', payload.employeeId, payload.competencyId ?? 'none')
       try {
-        return { ok: true, data: [] }
+        const entries = listEntries(db!, payload.employeeId, payload.competencyId)
+        return { ok: true, data: entries }
       } catch (e) {
         log.error('[behavior-log:list] error: %s', e instanceof Error ? e.message : String(e))
         return { ok: false, error: 'Failed to list behavior log entries.' }

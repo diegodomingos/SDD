@@ -126,3 +126,14 @@
 - `confirmSave` has no double-click in-flight guard — parallel IPC calls can race on behaviors state; pre-existing pattern noted in Story 3.2 review (`sdd-app/src/renderer/src/hooks/useFramework.ts:64`)
 - `COMPETENCY_CHIP_STYLES` keyed by display name — silent grey fallback if competency name changes or is added; design tradeoff documented in spec; address if competency names become configurable (`sdd-app/src/renderer/src/views/Framework.tsx`)
 - `fontWeight: 'inherit'` on nav label Typography may not cascade from parent ListItemButton `sx` — selected state bold emphasis may be silently ineffective; verify in browser (`sdd-app/src/renderer/src/components/layout/Sidebar.tsx`)
+
+## Deferred from: code review of 4-1-behavior-log-list-view (2026-05-01)
+
+- `db!` non-null assertion in `behavior-log:list` handler — pre-existing pattern across all handlers; consistent with project architecture; address when DB init lifecycle is hardened (`sdd-app/src/main/handlers/behaviorLogHandlers.ts`)
+- `selectedEmployee!` non-null assertion in EmployeeDetail — guarded by ViewRouter; accepted TypeScript pattern; address if component is ever rendered outside ViewRouter context (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx:25`)
+- useEffect has no IPC cancellation on unmount — IPC not cancellable; component-local hook prevents stale writes today; revisit if hook is lifted to shared context or cancellable IPC is introduced (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts`)
+- `useBehaviorLog` does not reset `entries` on new `load()` call — component-local mount means no stale data in current architecture; address if hook is lifted to shared context in Story 4.3 (filter feature) (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts`)
+- `colorMap` keyed by display name string — intentional per dev notes; silent grey fallback if competency name changes; address if competency names become configurable (`sdd-app/src/renderer/src/components/common/CompetencyChip.tsx`)
+- Sidebar "Employees" nav resurfaces EmployeeDetail without resetting selection — explicitly documented as acceptable in Story 4.1 dev notes; "Employees" breadcrumb link is the intended back-navigation path (`sdd-app/src/renderer/src/App.tsx`)
+- `showInlineRow && null` renders nothing — intentional placeholder; Story 4.2 wires InlineLogRow using this state (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- Evaluate tab placeholder text `"AI evaluation — coming in Epic 6."` deviates from spec `"Coming in Epic 6"` — not relevant; Epic 6 will replace the placeholder entirely (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
