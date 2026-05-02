@@ -34,12 +34,12 @@ export function useBehaviorLog() {
     }
   }, [])
 
-  const create = useCallback(async (payload: CreateBehaviorLogPayload): Promise<boolean> => {
+  const create = useCallback(async (payload: CreateBehaviorLogPayload, options?: { skipPrepend?: boolean }): Promise<boolean> => {
     setError(null)
     try {
       const result = await window.electronAPI.invoke<BehaviorLogEntry>('behavior-log:create', payload)
       if (result.ok) {
-        setEntries((prev) => [result.data, ...prev])
+        if (!options?.skipPrepend) setEntries((prev) => [result.data, ...prev])
         return true
       }
       setError(result.error)

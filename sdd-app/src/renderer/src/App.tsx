@@ -12,7 +12,7 @@ function ViewRouter(): React.JSX.Element {
   const selectedEmployee = useAppStore((s) => s.selectedEmployee)
   if (currentView === 'framework') return <Framework />
   if (currentView === 'settings') return <Settings />
-  if (currentView === 'employees' && selectedEmployee !== null) return <EmployeeDetail />
+  if (currentView === 'employees' && selectedEmployee !== null) return <EmployeeDetail key={selectedEmployee.id} />
   return <EmployeeList />
 }
 

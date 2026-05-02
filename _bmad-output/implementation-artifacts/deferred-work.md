@@ -144,3 +144,9 @@
 - Optimistic prepend puts past-dated entries above newer entries until next reload — spec-mandated "prepend so it appears immediately at top" behavior; sort order corrects on next `load()` (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:37`)
 - `competencyIds` element type/FK validation not done in handler — internal IPC only; SQLite transaction rollback handles invalid IDs correctly; generic error message sufficient for single-user desktop (`sdd-app/src/main/handlers/behaviorLogHandlers.ts:37`)
 - `mockDbForCreate` mock returns same `lastInsertRowid` for all `run()` calls — cannot distinguish entry vs junction insert rowid; test quality improvement only, not a correctness bug (`sdd-app/__tests__/main/db/behaviorLog.test.ts:16`)
+
+## Deferred from: code review of 4-3-filter-log-entries-by-competency (2026-05-02)
+
+- `load`'s `setError(null)` silently clears concurrent `loadCompetencies` errors — two independent useEffects fire on mount; if `loadCompetencies` sets an error, the near-simultaneous `load()` call's `setError(null)` clears it before render; pre-existing hook design (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:12`)
+- `afterEach(cleanup)` placed before imports — code organisation issue; `cleanup` called before ThemeProvider etc. are imported; works at runtime due to hoisting but misleads readers; pre-existing (`sdd-app/__tests__/renderer/components/CompetencyChip.test.tsx:6`)
+- `aria-pressed` asserted via `getAttribute` instead of `toHaveAttribute` — raw `getAttribute` returns `null` if attribute absent, which would vacuously pass if component omits `aria-pressed` entirely; pre-existing pattern across existing tests (`sdd-app/__tests__/renderer/components/CompetencyChip.test.tsx`)

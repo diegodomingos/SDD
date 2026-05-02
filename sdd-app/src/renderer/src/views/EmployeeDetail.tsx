@@ -28,19 +28,34 @@ export default function EmployeeDetail(): React.JSX.Element {
   const { entries, competencies, isLoading, error, load, loadCompetencies, create } = useBehaviorLog()
   const [activeTab, setActiveTab] = useState(0)
   const [showInlineRow, setShowInlineRow] = useState(false)
+  const [selectedCompetencyId, setSelectedCompetencyId] = useState<number | null>(null)
 
+  // Load competencies once on mount
   useEffect(() => {
-    load(employee.id)
     loadCompetencies()
-  }, [load, loadCompetencies, employee.id])
+  }, [loadCompetencies])
+
+  // Reload entries whenever employee or active filter changes
+  useEffect(() => {
+    load(employee.id, selectedCompetencyId ?? undefined)
+  }, [load, employee.id, selectedCompetencyId])
 
   const handleSave = useCallback(
     async (description: string, competencyIds: number[], entryDate: string): Promise<boolean> => {
-      const ok = await create({ employeeId: employee.id, description, competencyIds, entryDate })
-      if (ok) setShowInlineRow(false)
+      const ok = await create(
+        { employeeId: employee.id, description, competencyIds, entryDate },
+        selectedCompetencyId !== null ? { skipPrepend: true } : undefined
+      )
+      if (ok) {
+        if (selectedCompetencyId !== null) {
+          // Reload filtered view — prevents prepended entry from showing when it doesn't match the filter
+          load(employee.id, selectedCompetencyId)
+        }
+        setShowInlineRow(false)
+      }
       return ok
     },
-    [create, employee.id]
+    [create, employee.id, selectedCompetencyId, load]
   )
 
   return (
@@ -87,6 +102,23 @@ export default function EmployeeDetail(): React.JSX.Element {
             </Button>
           </Box>
 
+          {/* Filter chips */}
+          {competencies.length > 0 && (
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+              {competencies.map((c) => (
+                <CompetencyChip
+                  key={c.id}
+                  competency={c}
+                  mode="filter"
+                  selected={selectedCompetencyId === c.id}
+                  onClick={() =>
+                    setSelectedCompetencyId((prev) => (prev === c.id ? null : c.id))
+                  }
+                />
+              ))}
+            </Box>
+          )}
+
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -100,7 +132,9 @@ export default function EmployeeDetail(): React.JSX.Element {
           ) : entries.length === 0 && !showInlineRow ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 2 }}>
               <Typography color="text.secondary">
-                No behaviors logged for {employee.name} yet
+                {selectedCompetencyId !== null
+                  ? `No entries tagged to ${competencies.find((c) => c.id === selectedCompetencyId)?.name ?? 'this competency'} for ${employee.name}`
+                  : `No behaviors logged for ${employee.name} yet`}
               </Typography>
               <Button variant="contained" onClick={() => setShowInlineRow(true)}>
                 + Log Behavior

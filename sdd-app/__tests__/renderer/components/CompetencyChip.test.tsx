@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react'
-import { render, screen, cleanup } from '@testing-library/react'
-import { afterEach, describe, it, expect } from 'vitest'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 
 afterEach(() => cleanup())
 import { ThemeProvider } from '@mui/material/styles'
@@ -87,5 +87,27 @@ describe('CompetencyChip — filter', () => {
     )
     const btn = screen.getByRole('button')
     expect(btn.getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('has aria-pressed=false when not selected', () => {
+    wrap(
+      <CompetencyChip
+        competency={communication}
+        mode="filter"
+        selected={false}
+        onClick={() => {}}
+      />
+    )
+    const btn = screen.getByRole('button')
+    expect(btn.getAttribute('aria-pressed')).toBe('false')
+  })
+
+  it('calls onClick when clicked', () => {
+    const onClick = vi.fn()
+    wrap(
+      <CompetencyChip competency={communication} mode="filter" selected={false} onClick={onClick} />
+    )
+    fireEvent.click(screen.getByRole('button'))
+    expect(onClick).toHaveBeenCalledOnce()
   })
 })
