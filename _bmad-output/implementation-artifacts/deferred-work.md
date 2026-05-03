@@ -180,6 +180,11 @@
 - `afterEach(cleanup)` placed before imports — code organisation issue; `cleanup` called before ThemeProvider etc. are imported; works at runtime due to hoisting but misleads readers; pre-existing (`sdd-app/__tests__/renderer/components/CompetencyChip.test.tsx:6`)
 - `aria-pressed` asserted via `getAttribute` instead of `toHaveAttribute` — raw `getAttribute` returns `null` if attribute absent, which would vacuously pass if component omits `aria-pressed` entirely; pre-existing pattern across existing tests (`sdd-app/__tests__/renderer/components/CompetencyChip.test.tsx`)
 
+## Deferred from: code review of 6-2-ai-grade-result-display (2026-05-03)
+
+- `entryCount` mismatch — renderer `entries.length` snapshot may differ from entries the main process evaluated during the IPC call; narrow race condition; cosmetic impact only (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx:168`)
+- `getExpectedBehavior` null coerced to `''` silently — when expected behaviors are unconfigured for a competency+level pair, the AI receives no behavioral context; no guard, no log warning, no UI signal; could produce misleading grades (`sdd-app/src/main/handlers/aiHandlers.ts:18`)
+
 ## Deferred from: code review of 6-1-evaluate-tab-with-competency-filter-and-evidence-display (2026-05-03)
 
 - AC1 scroll position preservation — UX-DR10 scroll requirement is out of scope for Story 6.1; Scope Boundary explicitly excludes it; address if scroll restoration becomes a UX requirement in a future story (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)

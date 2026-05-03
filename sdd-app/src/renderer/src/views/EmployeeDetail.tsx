@@ -22,8 +22,10 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CompetencyChip from '../components/common/CompetencyChip'
 import InlineLogRow from '../components/log/InlineLogRow'
+import GradeResultCard from '../components/evaluation/GradeResultCard'
 import { useAppStore } from '../store/appStore'
 import { useBehaviorLog } from '../hooks/useBehaviorLog'
+import { useEvaluation } from '../hooks/useEvaluation'
 
 export default function EmployeeDetail(): React.JSX.Element {
   const employee = useAppStore((s) => s.selectedEmployee)!
@@ -31,6 +33,7 @@ export default function EmployeeDetail(): React.JSX.Element {
   const selectedCompetency = useAppStore((s) => s.selectedCompetency)
   const setCompetency = useAppStore((s) => s.setCompetency)
   const { entries, competencies, isLoading, error, load, loadCompetencies, create, update, remove } = useBehaviorLog()
+  const { isLoading: isEvaluating, result: evalResult, error: evalError, evaluate, reset } = useEvaluation()
   const [activeTab, setActiveTab] = useState(0)
   const [showInlineRow, setShowInlineRow] = useState(false)
   const [selectedCompetencyId, setSelectedCompetencyId] = useState<number | null>(null)
@@ -124,13 +127,21 @@ export default function EmployeeDetail(): React.JSX.Element {
                     competency={c}
                     mode="filter"
                     selected={selectedCompetency?.id === c.id}
-                    onClick={() => setCompetency(selectedCompetency?.id === c.id ? null : c)}
+                    onClick={() => {
+                      setCompetency(selectedCompetency?.id === c.id ? null : c)
+                      reset()
+                    }}
                   />
                 ))}
               </Box>
             )}
             {selectedCompetency !== null && (
-              <Button variant="contained" sx={{ ml: 2, whiteSpace: 'nowrap' }}>
+              <Button
+                variant="contained"
+                sx={{ ml: 2, whiteSpace: 'nowrap' }}
+                onClick={() => evaluate(employee.id, selectedCompetency.id)}
+                disabled={isEvaluating}
+              >
                 Run Evaluation
               </Button>
             )}
@@ -143,57 +154,71 @@ export default function EmployeeDetail(): React.JSX.Element {
                 Select a competency above to begin
               </Typography>
             </Box>
-          ) : error ? (
-            <Box sx={{ mt: 4 }}>
-              <Alert severity="error">{error}</Alert>
-            </Box>
-          ) : isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : entries.length === 0 ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 2 }}>
-              <Typography color="text.secondary">
-                No entries tagged to {selectedCompetency.name} for {employee.name}
-              </Typography>
-              <Button
-                variant="contained"
-                onClick={() => { if (!editingEntryId) { setActiveTab(0); setShowInlineRow(true) } }}
-              >
-                + Log Behavior
-              </Button>
-            </Box>
           ) : (
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell component="th" scope="col" sx={{ width: 110 }}>Date</TableCell>
-                    <TableCell component="th" scope="col">Description</TableCell>
-                    <TableCell component="th" scope="col" sx={{ width: 280 }}>Competencies</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {entries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell sx={{ verticalAlign: 'top', color: 'text.secondary', fontSize: '13px' }}>
-                        {entry.entryDate}
-                      </TableCell>
-                      <TableCell sx={{ verticalAlign: 'top', fontSize: '14px', whiteSpace: 'pre-wrap' }}>
-                        {entry.description}
-                      </TableCell>
-                      <TableCell sx={{ verticalAlign: 'top' }}>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {entry.competencies.map((c) => (
-                            <CompetencyChip key={c.id} competency={c} mode="read-only" />
-                          ))}
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <>
+              {(isEvaluating || evalResult !== null || evalError !== null) && (
+                <GradeResultCard
+                  isLoading={isEvaluating}
+                  result={evalResult}
+                  error={evalError}
+                  entryCount={entries.length}
+                  onRerun={() => evaluate(employee.id, selectedCompetency.id)}
+                  onRetry={() => evaluate(employee.id, selectedCompetency.id)}
+                />
+              )}
+              {error ? (
+                <Box sx={{ mt: 4 }}>
+                  <Alert severity="error">{error}</Alert>
+                </Box>
+              ) : isLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : entries.length === 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 2 }}>
+                  <Typography color="text.secondary">
+                    No entries tagged to {selectedCompetency.name} for {employee.name}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => { if (!editingEntryId) { setActiveTab(0); setShowInlineRow(true) } }}
+                  >
+                    + Log Behavior
+                  </Button>
+                </Box>
+              ) : (
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell component="th" scope="col" sx={{ width: 110 }}>Date</TableCell>
+                        <TableCell component="th" scope="col">Description</TableCell>
+                        <TableCell component="th" scope="col" sx={{ width: 280 }}>Competencies</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {entries.map((entry) => (
+                        <TableRow key={entry.id}>
+                          <TableCell sx={{ verticalAlign: 'top', color: 'text.secondary', fontSize: '13px' }}>
+                            {entry.entryDate}
+                          </TableCell>
+                          <TableCell sx={{ verticalAlign: 'top', fontSize: '14px', whiteSpace: 'pre-wrap' }}>
+                            {entry.description}
+                          </TableCell>
+                          <TableCell sx={{ verticalAlign: 'top' }}>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                              {entry.competencies.map((c) => (
+                                <CompetencyChip key={c.id} competency={c} mode="read-only" />
+                              ))}
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </>
           )}
         </>
       )}
