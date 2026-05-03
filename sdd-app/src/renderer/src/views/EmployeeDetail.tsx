@@ -28,6 +28,8 @@ import { useBehaviorLog } from '../hooks/useBehaviorLog'
 export default function EmployeeDetail(): React.JSX.Element {
   const employee = useAppStore((s) => s.selectedEmployee)!
   const setEmployee = useAppStore((s) => s.setEmployee)
+  const selectedCompetency = useAppStore((s) => s.selectedCompetency)
+  const setCompetency = useAppStore((s) => s.setCompetency)
   const { entries, competencies, isLoading, error, load, loadCompetencies, create, update, remove } = useBehaviorLog()
   const [activeTab, setActiveTab] = useState(0)
   const [showInlineRow, setShowInlineRow] = useState(false)
@@ -40,10 +42,15 @@ export default function EmployeeDetail(): React.JSX.Element {
     loadCompetencies()
   }, [loadCompetencies])
 
-  // Reload entries whenever employee or active filter changes
+  // Reload entries for the active tab's filter
   useEffect(() => {
-    load(employee.id, selectedCompetencyId ?? undefined)
-  }, [load, employee.id, selectedCompetencyId])
+    if (activeTab === 0) {
+      load(employee.id, selectedCompetencyId ?? undefined)
+    } else if (activeTab === 1 && selectedCompetency !== null) {
+      load(employee.id, selectedCompetency.id)
+    }
+    // activeTab === 1 && selectedCompetency === null: skip — instructional empty state, no fetch needed
+  }, [load, employee.id, selectedCompetencyId, selectedCompetency, activeTab])
 
   const handleSave = useCallback(
     async (description: string, competencyIds: number[], entryDate: string): Promise<boolean> => {
@@ -106,9 +113,89 @@ export default function EmployeeDetail(): React.JSX.Element {
       </Tabs>
 
       {activeTab === 1 && (
-        <Typography color="text.secondary" sx={{ mt: 4, textAlign: 'center' }}>
-          AI evaluation — coming in Epic 6.
-        </Typography>
+        <>
+          {/* Competency chips + Run Evaluation button row */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            {competencies.length > 0 && (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {competencies.map((c) => (
+                  <CompetencyChip
+                    key={c.id}
+                    competency={c}
+                    mode="filter"
+                    selected={selectedCompetency?.id === c.id}
+                    onClick={() => setCompetency(selectedCompetency?.id === c.id ? null : c)}
+                  />
+                ))}
+              </Box>
+            )}
+            {selectedCompetency !== null && (
+              <Button variant="contained" sx={{ ml: 2, whiteSpace: 'nowrap' }}>
+                Run Evaluation
+              </Button>
+            )}
+          </Box>
+
+          {/* Content area based on competency selection and data state */}
+          {selectedCompetency === null ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+              <Typography color="text.secondary">
+                Select a competency above to begin
+              </Typography>
+            </Box>
+          ) : error ? (
+            <Box sx={{ mt: 4 }}>
+              <Alert severity="error">{error}</Alert>
+            </Box>
+          ) : isLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : entries.length === 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 2 }}>
+              <Typography color="text.secondary">
+                No entries tagged to {selectedCompetency.name} for {employee.name}
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => { if (!editingEntryId) { setActiveTab(0); setShowInlineRow(true) } }}
+              >
+                + Log Behavior
+              </Button>
+            </Box>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell component="th" scope="col" sx={{ width: 110 }}>Date</TableCell>
+                    <TableCell component="th" scope="col">Description</TableCell>
+                    <TableCell component="th" scope="col" sx={{ width: 280 }}>Competencies</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {entries.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell sx={{ verticalAlign: 'top', color: 'text.secondary', fontSize: '13px' }}>
+                        {entry.entryDate}
+                      </TableCell>
+                      <TableCell sx={{ verticalAlign: 'top', fontSize: '14px', whiteSpace: 'pre-wrap' }}>
+                        {entry.description}
+                      </TableCell>
+                      <TableCell sx={{ verticalAlign: 'top' }}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {entry.competencies.map((c) => (
+                            <CompetencyChip key={c.id} competency={c} mode="read-only" />
+                          ))}
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </>
       )}
 
       {activeTab === 0 && (

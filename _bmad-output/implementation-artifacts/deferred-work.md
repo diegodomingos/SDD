@@ -179,3 +179,14 @@
 - `load`'s `setError(null)` silently clears concurrent `loadCompetencies` errors — two independent useEffects fire on mount; if `loadCompetencies` sets an error, the near-simultaneous `load()` call's `setError(null)` clears it before render; pre-existing hook design (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:12`)
 - `afterEach(cleanup)` placed before imports — code organisation issue; `cleanup` called before ThemeProvider etc. are imported; works at runtime due to hoisting but misleads readers; pre-existing (`sdd-app/__tests__/renderer/components/CompetencyChip.test.tsx:6`)
 - `aria-pressed` asserted via `getAttribute` instead of `toHaveAttribute` — raw `getAttribute` returns `null` if attribute absent, which would vacuously pass if component omits `aria-pressed` entirely; pre-existing pattern across existing tests (`sdd-app/__tests__/renderer/components/CompetencyChip.test.tsx`)
+
+## Deferred from: code review of 6-1-evaluate-tab-with-competency-filter-and-evidence-display (2026-05-03)
+
+- AC1 scroll position preservation — UX-DR10 scroll requirement is out of scope for Story 6.1; Scope Boundary explicitly excludes it; address if scroll restoration becomes a UX requirement in a future story (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- `selectedCompetency` persists across non-`setEmployee` navigation paths — current code paths always call `setEmployee` which resets the value; latent risk only for future navigation flows that bypass `setEmployee` (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- Shared `entries`/`isLoading` causes brief stale-data flash on tab switch — inherent to shared-hook design established in prior stories; requires per-tab state isolation to properly fix (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts`)
+- Rapid competency switching race condition — no abort controller in `useBehaviorLog`; a slow first request resolving after a fast second one permanently shows wrong data; hook-level fix needed (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts`)
+- Reverse-chronological order relies on hook/DB ordering — no explicit sort in Evaluate tab render; consistent with Behavior Log tab; if hook guarantees order the behavior is correct (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- Description renders in full, not excerpted — AC4 says "description excerpt" but full text renders; consistent with Behavior Log tab; both tabs need truncation in a future UI polish story (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- Table header/cell associations for multi-chip competency column — screen-reader navigation fragile for the competency chip column; consistent with Behavior Log tab; address in accessibility pass (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- `entry.entryDate` rendered as raw string without locale formatting — consistent with Behavior Log tab; address in a future UI polish story (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
