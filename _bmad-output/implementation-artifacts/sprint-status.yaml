@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-05-02 # story 5-1 done
+last_updated: 2026-05-02 # story 5-2 done
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -78,7 +78,7 @@ development_status:
   # ── Epic 5: Application Settings & API Configuration ───────────────────────
   epic-5: in-progress
   5-1-settings-view-with-manager-display-name: done
-  5-2-claude-api-key-configuration-and-model-selection: backlog
+  5-2-claude-api-key-configuration-and-model-selection: done
   5-3-danger-zone-clear-all-data: backlog
   epic-5-retrospective: optional
 

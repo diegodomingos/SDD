@@ -159,6 +159,13 @@
 - Whitespace-only name sends empty string to backend — handler correctly rejects it but the field visually shows spaces, making the error confusing; consider disabling Save when `draftName.trim() === ''` (`sdd-app/src/renderer/src/views/Settings.tsx`)
 - Sidebar `load()` fires on every remount — rewrites `storedName` in Zustand, which shifts Settings' `isDirty` computation mid-edit; low risk in practice (SQLite read returns current value), but fragile if save-then-remount race occurs (`sdd-app/src/renderer/src/components/layout/Sidebar.tsx`)
 
+## Deferred from: code review of 5-2-claude-api-key-configuration-and-model-selection (2026-05-02)
+
+- `getApiKey` not wired to any IPC handler — intentional; needed by Story 6.5 main-process AI calls (`sdd-app/src/main/handlers/settingsHandlers.ts`)
+- `clearApiKey` has no IPC handler — intentional; needed by Story 5.3 Danger Zone (`sdd-app/src/main/handlers/settingsHandlers.ts`)
+- `getModel` returns stale invalid model from DB — VALID_MODELS enforcement is handler-only; acceptable for current fixed-list scope; revisit if model list changes (`sdd-app/src/main/settings/modelPreference.ts`)
+- No test for `getApiKey` with corrupted/invalid base64 stored value — covered if patch for `decryptString` error handling is applied (`sdd-app/__tests__/main/settings/apiKey.test.ts`)
+
 ## Deferred from: code review of 4-3-filter-log-entries-by-competency (2026-05-02)
 
 - `load`'s `setError(null)` silently clears concurrent `loadCompetencies` errors — two independent useEffects fire on mount; if `loadCompetencies` sets an error, the near-simultaneous `load()` call's `setError(null)` clears it before render; pre-existing hook design (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:12`)
