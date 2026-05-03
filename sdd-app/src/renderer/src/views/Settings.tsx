@@ -1,5 +1,8 @@
-import { useEffect } from 'react'
-import { Box, Button, CircularProgress, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
+import {
+  Box, Button, CircularProgress, Dialog, DialogActions, DialogContent,
+  DialogContentText, DialogTitle, MenuItem, Select, TextField, Typography,
+} from '@mui/material'
 import { useSettings } from '../hooks/useSettings'
 import { useAppStore } from '../store/appStore'
 
@@ -8,7 +11,9 @@ export default function Settings(): React.JSX.Element {
     draftName, setDraftName, isLoading, isSaving, nameError, keyError, modelError, load, saveManagerName,
     isKeyConfigured, draftApiKey, setDraftApiKey, isSavingKey, saveApiKey,
     draftModel, setDraftModel, isSavingModel, saveModel,
+    isClearingData, clearDataError, clearAllData: clearAllDataFn, resetClearError,
   } = useSettings()
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const storedName = useAppStore((s) => s.managerName)
   const storedModel = useAppStore((s) => s.aiModel)
 
@@ -31,7 +36,13 @@ export default function Settings(): React.JSX.Element {
     await saveModel(draftModel)
   }
 
+  const handleClearConfirm = async () => {
+    const ok = await clearAllDataFn()
+    if (ok) setConfirmOpen(false)
+  }
+
   return (
+    <>
     <Box sx={{ p: 3, maxWidth: 600 }}>
       <Typography sx={{ fontSize: '20px', fontWeight: 600, mb: 3 }}>Settings</Typography>
 
@@ -160,6 +171,55 @@ export default function Settings(): React.JSX.Element {
           </Typography>
         )}
       </Box>
+
+      {/* Danger Zone */}
+      <Box
+        sx={{
+          mb: 3,
+          p: 2.5,
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'error.main',
+          borderRadius: 1,
+        }}
+      >
+        <Typography sx={{ fontSize: '14px', fontWeight: 600, mb: 0.5, color: 'error.main' }}>
+          Danger Zone
+        </Typography>
+        <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 2 }}>
+          Permanently delete all employees, behavior log entries, and expected behaviors.
+        </Typography>
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={() => { resetClearError(); setConfirmOpen(true) }}
+          disabled={isClearingData}
+        >
+          {isClearingData ? 'Clearing…' : 'Clear all data'}
+        </Button>
+        {clearDataError && (
+          <Typography color="error" sx={{ fontSize: '13px', mt: 1 }}>
+            {clearDataError}
+          </Typography>
+        )}
+      </Box>
+
     </Box>
+    <Dialog open={confirmOpen} onClose={isClearingData ? undefined : () => setConfirmOpen(false)}>
+      <DialogTitle>Clear all data?</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          All employees, behavior log entries, and expected behaviors will be permanently
+          deleted. This cannot be undone.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+        <Button color="error" onClick={handleClearConfirm} disabled={isClearingData}>
+          Delete all data
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   )
 }

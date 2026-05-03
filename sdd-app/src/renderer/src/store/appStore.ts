@@ -16,6 +16,7 @@ interface AppStore {
   setManagerName: (name: string) => void
   setKeyConfigured: (configured: boolean) => void
   setAiModel: (model: string) => void
+  resetUserData: () => void
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -31,4 +32,5 @@ export const useAppStore = create<AppStore>((set) => ({
   setManagerName: (name) => set({ managerName: name }),
   setKeyConfigured: (configured) => set({ keyConfigured: configured }),
   setAiModel: (model) => set({ aiModel: model }),
+  resetUserData: () => set({ selectedEmployee: null, selectedCompetency: null }),
 }))

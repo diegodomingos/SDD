@@ -166,6 +166,14 @@
 - `getModel` returns stale invalid model from DB — VALID_MODELS enforcement is handler-only; acceptable for current fixed-list scope; revisit if model list changes (`sdd-app/src/main/settings/modelPreference.ts`)
 - No test for `getApiKey` with corrupted/invalid base64 stored value — covered if patch for `decryptString` error handling is applied (`sdd-app/__tests__/main/settings/apiKey.test.ts`)
 
+## Deferred from: code review of 5-3-danger-zone-clear-all-data (2026-05-02)
+
+- `setKeyConfigured` typo `confused` instead of `configured` — pre-existing bug in appStore.ts, all calls to `setKeyConfigured` throw ReferenceError at runtime (`sdd-app/src/renderer/src/store/appStore.ts`)
+- CASCADE relies on `foreign_keys = ON` pragma being active — spec-approved; pragma set in `database.ts` at startup; if a new DB connection ever omits the pragma, `behavior_log_entries` and `behavior_log_entry_competencies` silently stay behind (`sdd-app/src/main/db/clearAllData.ts`)
+- Tests cannot verify cascade-deleted tables (`behavior_log_entries`, `behavior_log_entry_competencies`) — ABI mock limitation prevents real SQLite in Vitest; spec documents CASCADE explicitly as the deletion mechanism; gap is known and unfixable with current mock infrastructure (`sdd-app/__tests__/main/db/clearAllData.test.ts`)
+- `resetUserData` limited to `selectedEmployee`/`selectedCompetency` — spec intentionally scopes this; `currentView` and employee list cache not reset; views reload from DB on navigation (`sdd-app/src/renderer/src/store/appStore.ts`)
+- No integration/E2E test for dialog confirmation flow — dialog open/close/cancel not covered by automated tests; out of story scope; unit tests cover the DB layer (`sdd-app/src/renderer/src/views/Settings.tsx`)
+
 ## Deferred from: code review of 4-3-filter-log-entries-by-competency (2026-05-02)
 
 - `load`'s `setError(null)` silently clears concurrent `loadCompetencies` errors — two independent useEffects fire on mount; if `loadCompetencies` sets an error, the near-simultaneous `load()` call's `setError(null)` clears it before render; pre-existing hook design (`sdd-app/src/renderer/src/hooks/useBehaviorLog.ts:12`)

@@ -16,9 +16,12 @@ export function useSettings() {
 
   const [draftModel, setDraftModel] = useState('claude-haiku-4-5-20251001')
   const [isSavingModel, setIsSavingModel] = useState(false)
+  const [isClearingData, setIsClearingData] = useState(false)
+  const [clearDataError, setClearDataError] = useState<string | null>(null)
 
   const setStoreKeyConfigured = useAppStore((s) => s.setKeyConfigured)
   const setStoreAiModel = useAppStore((s) => s.setAiModel)
+  const resetUserData = useAppStore((s) => s.resetUserData)
 
   const load = useCallback(async () => {
     setIsLoading(true)
@@ -126,9 +129,30 @@ export function useSettings() {
     [setStoreAiModel]
   )
 
+  const clearAllData = useCallback(async (): Promise<boolean> => {
+    setIsClearingData(true)
+    setClearDataError(null)
+    try {
+      const result = await window.electronAPI.invoke<null>('settings:clear-all-data')
+      if (result.ok) {
+        resetUserData()
+      } else {
+        setClearDataError(result.error ?? 'Failed to clear data.')
+      }
+      return result.ok
+    } catch {
+      setClearDataError('Unexpected error clearing data.')
+      return false
+    } finally {
+      setIsClearingData(false)
+    }
+  }, [resetUserData])
+
   return {
     draftName, setDraftName, isLoading, isSaving, nameError, keyError, modelError, load, saveManagerName,
     isKeyConfigured, draftApiKey, setDraftApiKey, isSavingKey, saveApiKey,
     draftModel, setDraftModel, isSavingModel, saveModel,
+    isClearingData, clearDataError, clearAllData,
+    resetClearError: () => setClearDataError(null),
   }
 }

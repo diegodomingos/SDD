@@ -4,6 +4,7 @@ import type { IpcResult, SetApiKeyPayload, SetModelPayload, SetManagerNamePayloa
 import { db } from '../db/database'
 import { getManagerName, setManagerName, getModel, setModel } from '../settings/modelPreference'
 import { isConfigured, setApiKey } from '../settings/apiKey'
+import { clearAllData } from '../db/clearAllData'
 
 export function registerSettingsHandlers(): void {
   ipcMain.handle('settings:get-manager-name', async (): Promise<IpcResult<string>> => {
@@ -97,4 +98,16 @@ export function registerSettingsHandlers(): void {
       }
     }
   )
+
+  ipcMain.handle('settings:clear-all-data', async (): Promise<IpcResult<null>> => {
+    log.info('[settings:clear-all-data]')
+    try {
+      if (!db) return { ok: false, error: 'Database not ready.' }
+      clearAllData(db)
+      return { ok: true, data: null }
+    } catch (e) {
+      log.error('[settings:clear-all-data] error: %s', e instanceof Error ? e.message : String(e))
+      return { ok: false, error: 'Failed to clear data.' }
+    }
+  })
 }
