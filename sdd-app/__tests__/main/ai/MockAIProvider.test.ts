@@ -36,4 +36,10 @@ describe('MockAIProvider', () => {
     await new MockAIProvider().evaluate(sampleInput)
     expect(Date.now() - start).toBeLessThan(50)
   })
+
+  it('throws when shouldThrow is true', async () => {
+    await expect(
+      new MockAIProvider('Meets Expectations', true).evaluate(sampleInput)
+    ).rejects.toThrow('Mock network error: Connection refused')
+  })
 })

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
 import type { EvaluateResult, Grade } from '../../../../shared/ipc-types'
 import InsufficientInputCard from './InsufficientInputCard'
 
@@ -39,7 +39,7 @@ export default function GradeResultCard({
         </Box>
       ) : error ? (
         <Box>
-          <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>
+          <Alert severity="error" role="presentation" sx={{ mb: 2 }}>{error}</Alert>
           <Button variant="outlined" onClick={onRetry}>Retry</Button>
         </Box>
       ) : result ? (

@@ -198,6 +198,14 @@
 
 ## Deferred from: code review of 6-3-insufficient-input-outcome (2026-05-03)
 
+## Deferred from: code review of 6-4-ai-error-handling-and-network-resilience (2026-05-03)
+
+- No structured error metadata (e.g., `error.code`) on thrown Error in `MockAIProvider`; `aiHandlers.ts` cannot distinguish network vs auth errors; relevant for Story 6.5 `ClaudeAIProvider` implementation (`sdd-app/src/main/ai/MockAIProvider.ts:13-16`)
+- `error ?` condition in `GradeResultCard` silently skips error branch when error is empty string; Retry button unreachable in that edge case; pre-existing from before this diff (`sdd-app/src/renderer/src/components/evaluation/GradeResultCard.tsx:40`)
+- `MockAIProvider` is the sole `AIProvider` implementation; test-double/production boundary not enforced by file structure or module guards; pre-existing since Story 1.4 (`sdd-app/src/main/ai/MockAIProvider.ts`)
+
+## Deferred from: code review of 6-3-insufficient-input-outcome (2026-05-03)
+
 - Hardcoded hex colors `#E65100`/`#FFF3E0` in `InsufficientInputCard` — spec-mandated values, pre-existing project pattern; revisit if dark mode or theming is introduced (`sdd-app/src/renderer/src/components/evaluation/InsufficientInputCard.tsx`)
 - Empty `competencyName` string produces blank in copy ("Add more observations for  to unlock a grade.") — upstream data validation concern; add non-empty guard at competency creation time (`sdd-app/src/renderer/src/components/evaluation/InsufficientInputCard.tsx:36`)
 - `editingEntryId` not cleared in `handleLogBehaviorFromInsufficient` — could produce simultaneous edit+new-entry inline rows; pre-existing gap shared by header CTA (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx:94`)

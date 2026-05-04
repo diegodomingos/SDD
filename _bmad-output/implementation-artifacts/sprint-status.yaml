@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-05-03 # story 6-3 done
+last_updated: 2026-05-03 # story 6-4 done
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -87,7 +87,7 @@ development_status:
   6-1-evaluate-tab-with-competency-filter-and-evidence-display: done
   6-2-ai-grade-result-display: done
   6-3-insufficient-input-outcome: done
-  6-4-ai-error-handling-and-network-resilience: backlog
+  6-4-ai-error-handling-and-network-resilience: done
   6-5-real-claude-api-integration: backlog
   6-6-testing-accessibility-and-packaging: backlog
   epic-6-retrospective: optional
