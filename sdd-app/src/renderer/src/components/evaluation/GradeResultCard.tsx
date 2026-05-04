@@ -1,5 +1,6 @@
 import { Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
 import type { EvaluateResult, Grade } from '../../../../shared/ipc-types'
+import InsufficientInputCard from './InsufficientInputCard'
 
 const GRADE_COLORS: Record<Grade, string> = {
   'Exceeds Expectations': '#2E7D32',
@@ -13,6 +14,8 @@ interface GradeResultCardProps {
   result: EvaluateResult | null
   error: string | null
   entryCount: number
+  competencyName: string
+  onLogBehavior: () => void
   onRerun: () => void
   onRetry: () => void
 }
@@ -22,6 +25,8 @@ export default function GradeResultCard({
   result,
   error,
   entryCount,
+  competencyName,
+  onLogBehavior,
   onRerun,
   onRetry,
 }: GradeResultCardProps): React.JSX.Element {
@@ -38,36 +43,45 @@ export default function GradeResultCard({
           <Button variant="outlined" onClick={onRetry}>Retry</Button>
         </Box>
       ) : result ? (
-        <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: 1,
-                  backgroundColor: GRADE_COLORS[result.grade],
-                  color: '#fff',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  alignSelf: 'flex-start',
-                }}
-              >
-                {result.grade}
+        result.grade === 'Insufficient Input' ? (
+          <InsufficientInputCard
+            competencyName={competencyName}
+            rationale={result.rationale}
+            onLogBehavior={onLogBehavior}
+            onRerun={onRerun}
+          />
+        ) : (
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 1,
+                    backgroundColor: GRADE_COLORS[result.grade],
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    alignSelf: 'flex-start',
+                  }}
+                >
+                  {result.grade}
+                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  Based on {entryCount} observation{entryCount !== 1 ? 's' : ''}
+                </Typography>
               </Box>
-              <Typography variant="caption" color="text.secondary">
-                Based on {entryCount} observation{entryCount !== 1 ? 's' : ''}
-              </Typography>
+              <Button variant="outlined" onClick={onRerun} sx={{ ml: 2, whiteSpace: 'nowrap' }}>
+                Re-run Evaluation
+              </Button>
             </Box>
-            <Button variant="outlined" onClick={onRerun} sx={{ ml: 2, whiteSpace: 'nowrap' }}>
-              Re-run Evaluation
-            </Button>
+            <Typography sx={{ fontSize: '14px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              {result.rationale}
+            </Typography>
           </Box>
-          <Typography sx={{ fontSize: '14px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-            {result.rationale}
-          </Typography>
-        </Box>
+        )
       ) : null}
     </Paper>
   )

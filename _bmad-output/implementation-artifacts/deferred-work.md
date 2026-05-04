@@ -195,3 +195,12 @@
 - Description renders in full, not excerpted — AC4 says "description excerpt" but full text renders; consistent with Behavior Log tab; both tabs need truncation in a future UI polish story (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
 - Table header/cell associations for multi-chip competency column — screen-reader navigation fragile for the competency chip column; consistent with Behavior Log tab; address in accessibility pass (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
 - `entry.entryDate` rendered as raw string without locale formatting — consistent with Behavior Log tab; address in a future UI polish story (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+
+## Deferred from: code review of 6-3-insufficient-input-outcome (2026-05-03)
+
+- Hardcoded hex colors `#E65100`/`#FFF3E0` in `InsufficientInputCard` — spec-mandated values, pre-existing project pattern; revisit if dark mode or theming is introduced (`sdd-app/src/renderer/src/components/evaluation/InsufficientInputCard.tsx`)
+- Empty `competencyName` string produces blank in copy ("Add more observations for  to unlock a grade.") — upstream data validation concern; add non-empty guard at competency creation time (`sdd-app/src/renderer/src/components/evaluation/InsufficientInputCard.tsx:36`)
+- `editingEntryId` not cleared in `handleLogBehaviorFromInsufficient` — could produce simultaneous edit+new-entry inline rows; pre-existing gap shared by header CTA (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx:94`)
+- Empty `rationale` string renders wasted vertical spacing with mb:2 and no text — upstream AI response concern; conditionally render rationale block (`sdd-app/src/renderer/src/components/evaluation/InsufficientInputCard.tsx:40`)
+- `GRADE_COLORS[result.grade]` has no undefined fallback — pre-existing exhaustiveness concern; add `?? '#757575'` fallback if Grade type ever gains a new variant before GRADE_COLORS is updated (`sdd-app/src/renderer/src/components/evaluation/GradeResultCard.tsx:63`)
+- No component or interaction tests for `InsufficientInputCard` / `handleLogBehaviorFromInsufficient` — explicitly Story 6.6 scope per spec

@@ -36,6 +36,7 @@ export default function EmployeeDetail(): React.JSX.Element {
   const { isLoading: isEvaluating, result: evalResult, error: evalError, evaluate, reset } = useEvaluation()
   const [activeTab, setActiveTab] = useState(0)
   const [showInlineRow, setShowInlineRow] = useState(false)
+  const [inlineRowInitialCompetencyIds, setInlineRowInitialCompetencyIds] = useState<number[] | undefined>(undefined)
   const [selectedCompetencyId, setSelectedCompetencyId] = useState<number | null>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [editingEntryId, setEditingEntryId] = useState<number | null>(null)
@@ -67,6 +68,7 @@ export default function EmployeeDetail(): React.JSX.Element {
           load(employee.id, selectedCompetencyId)
         }
         setShowInlineRow(false)
+        setInlineRowInitialCompetencyIds(undefined)
       }
       return ok
     },
@@ -88,6 +90,13 @@ export default function EmployeeDetail(): React.JSX.Element {
     },
     [remove]
   )
+
+  const handleLogBehaviorFromInsufficient = useCallback(() => {
+    setActiveTab(0)
+    setShowInlineRow(true)
+    setSelectedCompetencyId(selectedCompetency!.id)
+    setInlineRowInitialCompetencyIds([selectedCompetency!.id])
+  }, [selectedCompetency])
 
   return (
     <Box>
@@ -162,8 +171,10 @@ export default function EmployeeDetail(): React.JSX.Element {
                   result={evalResult}
                   error={evalError}
                   entryCount={entries.length}
-                  onRerun={() => evaluate(employee.id, selectedCompetency.id)}
-                  onRetry={() => evaluate(employee.id, selectedCompetency.id)}
+                  competencyName={selectedCompetency!.name}
+                  onLogBehavior={handleLogBehaviorFromInsufficient}
+                  onRerun={() => evaluate(employee.id, selectedCompetency!.id)}
+                  onRetry={() => evaluate(employee.id, selectedCompetency!.id)}
                 />
               )}
               {error ? (
@@ -297,9 +308,14 @@ export default function EmployeeDetail(): React.JSX.Element {
                 <TableBody>
                   {showInlineRow && (
                     <InlineLogRow
+                      key={inlineRowInitialCompetencyIds?.join(',') ?? 'default'}
                       competencies={competencies}
+                      initialCompetencyIds={inlineRowInitialCompetencyIds}
                       onSave={handleSave}
-                      onCancel={() => setShowInlineRow(false)}
+                      onCancel={() => {
+                        setShowInlineRow(false)
+                        setInlineRowInitialCompetencyIds(undefined)
+                      }}
                     />
                   )}
                   {entries.map((entry) =>
