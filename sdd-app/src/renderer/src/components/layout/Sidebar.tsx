@@ -125,7 +125,7 @@ export default function Sidebar(): React.JSX.Element {
           borderColor: 'divider',
         }}
       >
-        <Typography sx={{ fontSize: '11px', color: '#9CA3AF' }}>v1.0.0 · PoC</Typography>
+        <Typography sx={{ fontSize: '11px', color: '#9CA3AF' }}>v1.0.0</Typography>
       </Box>
     </Box>
   )

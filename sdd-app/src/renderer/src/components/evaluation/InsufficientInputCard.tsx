@@ -5,46 +5,38 @@ interface InsufficientInputCardProps {
   competencyName: string
   rationale: string
   onLogBehavior: () => void
-  onRerun: () => void
 }
 
 export default function InsufficientInputCard({
   competencyName,
   rationale,
   onLogBehavior,
-  onRerun,
 }: InsufficientInputCardProps): React.JSX.Element {
   return (
     <Box
       role="alert"
       sx={{
         p: 3,
-        border: '1px solid',
-        borderColor: '#E65100',
+        border: '1px solid #FCD34D',
         borderRadius: 1,
-        backgroundColor: '#FFF3E0',
+        bgcolor: '#FFFBEB',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <WarningAmberIcon sx={{ color: '#E65100' }} />
-        <Typography sx={{ fontWeight: 600, color: '#E65100' }}>
+        <WarningAmberIcon sx={{ color: '#92400E' }} />
+        <Typography sx={{ fontWeight: 600, color: '#92400E' }}>
           Insufficient Input
         </Typography>
       </Box>
-      <Typography variant="body2" sx={{ mb: 1.5 }}>
-        Add more observations for {competencyName} to unlock a grade.
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
+      <Typography variant="body2" sx={{ mb: 1.5, color: '#78350F' }}>
         {rationale}
       </Typography>
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button variant="contained" onClick={onLogBehavior}>
-          + Log Behavior
-        </Button>
-        <Button variant="outlined" onClick={onRerun}>
-          Re-run Evaluation
-        </Button>
-      </Box>
+      <Typography sx={{ fontSize: '13px', color: '#B45309', fontWeight: 500, mb: 2 }}>
+        → Add more {competencyName} observations to unlock an assessment
+      </Typography>
+      <Button variant="contained" onClick={onLogBehavior}>
+        + Log Behavior
+      </Button>
     </Box>
   )
 }

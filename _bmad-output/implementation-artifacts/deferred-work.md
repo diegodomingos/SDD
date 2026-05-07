@@ -212,3 +212,12 @@
 - Empty `rationale` string renders wasted vertical spacing with mb:2 and no text — upstream AI response concern; conditionally render rationale block (`sdd-app/src/renderer/src/components/evaluation/InsufficientInputCard.tsx:40`)
 - `GRADE_COLORS[result.grade]` has no undefined fallback — pre-existing exhaustiveness concern; add `?? '#757575'` fallback if Grade type ever gains a new variant before GRADE_COLORS is updated (`sdd-app/src/renderer/src/components/evaluation/GradeResultCard.tsx:63`)
 - No component or interaction tests for `InsufficientInputCard` / `handleLogBehaviorFromInsufficient` — explicitly Story 6.6 scope per spec
+
+## Deferred from: code review of 6-5-ux-fidelity-fix (2026-05-07)
+
+- AC15: AppShell inner content Box missing `maxWidth: 960, mx: 'auto'` — deferred, visually looks fine without it; impact uncertain (`sdd-app/src/renderer/src/components/layout/AppShell.tsx`)
+- Avatar initials: employee names with extra/leading spaces produce empty or garbled initials text — no crash, cosmetic only; form validation likely prevents this at entry time (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- `parseISO`/`format` calls lack `isValid()` guard — malformed date string from DB would crash the entries table render; app stores only valid ISO dates so the risk is DB corruption only (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`, `sdd-app/src/renderer/src/views/EmployeeList.tsx`)
+- Chip colors hardcoded as strings in `CHIP_COLORS` — unknown/renamed competency silently renders in neutral gray; intentional per dev notes; address if competency names become configurable (`sdd-app/src/renderer/src/components/common/CompetencyChip.tsx`)
+- `createEmployee`/`updateEmployee` return `entryCount: undefined` — aggregation columns not included in create/update SELECT query; UI reloads via `listEmployees` after mutation so the inconsistent snapshot is never displayed (`sdd-app/src/main/db/employees.ts`)
+- `listEmployees` always pays LEFT JOIN + GROUP BY cost — every render of the employee list re-aggregates; acceptable for PoC scale; revisit if the employee or log count grows substantially (`sdd-app/src/main/db/employees.ts`)

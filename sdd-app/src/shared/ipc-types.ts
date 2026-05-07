@@ -19,6 +19,8 @@ export interface Employee {
   name: string
   level: CompetencyLevel
   createdAt: string // ISO 8601 datetime string
+  entryCount?: number
+  lastEntryDate?: string | null // ISO 8601 date, e.g. '2026-04-25', or null
 }
 
 export interface Competency {

@@ -936,7 +936,73 @@ So that I can retry without confusion and continue using all other app features 
 
 ---
 
-### Story 6.5: Real Claude API Integration
+### Story 6.5: UX Fidelity Fix
+
+As a manager,
+I want the application's visual design to match the approved mockups exactly,
+So that the tool looks and feels as designed — building confidence and trust in the product before real AI integration.
+
+**Acceptance Criteria:**
+
+**Given** `EmployeeDetail.tsx` renders with a selected employee
+**When** the view loads
+**Then** an employee header section appears between the breadcrumb and the tabs, containing: a 42×42px circular avatar (background `#EEF2FF`, color `#3B5BDB`) with the employee's initials, the employee's name at 20px bold, and meta text "Level [X] · [N] behavior entries" at 13px `#6B7280`
+
+**Given** behavior log entries are displayed in any table view
+**When** the `entryDate` column renders
+**Then** dates are formatted as "Apr 14, 2026" (human-readable) — not as ISO "2026-04-14"
+
+**Given** `GradeResultCard` renders in the Evaluate tab after a successful evaluation
+**When** the result is displayed
+**Then** the card appears BELOW the filtered entries table — not above it
+
+**Given** `CompetencyChip` renders in `read-only` mode
+**When** it displays any competency
+**Then** it uses the three-tone color style from the mockup: Communication (color `#2563EB`, border `#93C5FD`, bg `#EFF6FF`), Client Focus (color `#0D9488`, border `#5EEAD4`, bg `#F0FDFA`), Proactivity (color `#D97706`, border `#FCD34D`, bg `#FFFBEB`), Teamwork (color `#7C3AED`, border `#C4B5FD`, bg `#F5F3FF`)
+
+**Given** `CompetencyChip` renders in `filter` mode
+**When** a chip is inactive
+**Then** it has white background with colored border and text; when active, it shows a light tint background (same colors as read-only bg) — NOT a solid filled background with white text
+
+**Given** `GradeResultCard` shows a grade result
+**When** the grade badge renders
+**Then** it uses the light-bg + dark-text + border style: Exceeds (color `#166534`, bg `#DCFCE7`, border `#86EFAC`), Meets (color `#1E40AF`, bg `#DBEAFE`, border `#93C5FD`), Does Not Meet (color `#991B1B`, bg `#FEE2E2`, border `#FCA5A5`); the grade badge and "Based on N observations" appear inline in a flex row
+
+**Given** `GradeResultCard` shows a grade result
+**When** the rationale section renders
+**Then** an "AI ASSESSMENT · [Competency] · LEVEL [X]" uppercase label (11px, `#9CA3AF`, letter-spacing 0.7px) appears above the grade row, and the rationale text is displayed in a styled block (background `#F9FAFB`, 3px left border `#C7D2FE`, padding 12px 16px, border-radius 0 4px 4px 0)
+
+**Given** `InsufficientInputCard` renders
+**When** the card is displayed
+**Then** it uses amber/yellow styling: background `#FFFBEB`, border `#FCD34D`, title color `#92400E`; the CTA text reads "→ Add more [Competency] observations to unlock an assessment"; the card does NOT show a Re-run Evaluation button (only the "+ Log Behavior" primary button)
+
+**Given** the Evaluate tab renders with no competency selected
+**When** the empty state shows
+**Then** a "Select a competency to evaluate:" label (13px, `#6B7280`) appears before the filter chips; the empty content area is a styled dashed card (white bg, 1.5px dashed `#E5E7EB` border, borderRadius 8px, padding 56px 24px, centered content) with a 📊 icon (32px), title "Select a competency above to begin", and subtitle "The relevant behavior entries will be shown, then you can run the AI assessment."
+
+**Given** `InlineLogRow` renders in the table
+**When** the editable row is displayed
+**Then** it spans four columns matching the parent table (Date | Description | Competencies | Actions), with save and cancel in a separate fourth TableCell; the save button is a circular 32×32px button with background `#DCFCE7`, color `#166534`, border `1px solid #86EFAC`; the cancel button is circular 32×32px with background `#FEE2E2`, color `#991B1B`, border `1px solid #FCA5A5`
+
+**Given** `Settings.tsx` renders
+**When** the view loads
+**Then** settings are organized into three named sections with styled section headers (uppercase 13px, `#374151`, background `#F9FAFB`, border-bottom, padding 14px 20px): "General" (manager name), "AI Configuration" (API key + model), "Data Management" (danger zone with red border `#FCA5A5` and red header background `#FFF5F5`); section label reads "Data Management" not "Danger Zone"; API key input is 380px wide with a show/hide eye icon button
+
+**Given** the Behavior Log tab renders
+**When** the header row above the table shows
+**Then** it displays "[N] entries · all competencies" (or "[N] entries · [CompetencyName]" when filtered) in 13px `#6B7280` text instead of a "Behavior Log" heading
+
+**Given** the Employee list renders
+**When** employees exist in the database
+**Then** the table shows four columns: Name, Level, Last Entry (most recent behavior log date formatted as "Apr 14, 2026", or "—" if no entries), and Log Entries (count of total entries, or "—" if zero); clicking anywhere on the row (not just the name) navigates to the employee detail
+
+**Given** `AppShell.tsx` renders
+**When** the content area shows
+**Then** the content area has a maximum width of 960px
+
+---
+
+### Story 6.6: Real Claude API Integration
 
 As a manager,
 I want the AI evaluation to use the real Claude API with my configured key,
@@ -966,7 +1032,7 @@ So that I receive genuine, evidence-grounded grades and rationales from the AI.
 
 ---
 
-### Story 6.6: Testing, Accessibility, and Packaging
+### Story 6.7: Testing, Accessibility, and Packaging
 
 As a manager and developer,
 I want the application fully tested, accessibility-verified, and packaged as an installer,

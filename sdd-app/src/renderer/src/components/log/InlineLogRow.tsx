@@ -85,9 +85,9 @@ export default function InlineLogRow({ competencies, onSave, onCancel, initialDe
           />
         </TableCell>
 
-        {/* Chips + actions cell */}
+        {/* Competencies cell */}
         <TableCell sx={{ verticalAlign: 'top', width: 280, pt: 1.5 }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {competencies.map((c) => (
               <CompetencyChip
                 key={c.id}
@@ -98,24 +98,45 @@ export default function InlineLogRow({ competencies, onSave, onCancel, initialDe
               />
             ))}
           </Box>
+        </TableCell>
+
+        {/* Actions cell */}
+        <TableCell sx={{ verticalAlign: 'top', width: 80, pt: 1.5 }}>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             <IconButton
               size="small"
-              color="primary"
               aria-label="Save log entry"
               onClick={handleSave}
               disabled={!canSave || saving}
-              sx={{ '&.Mui-disabled': { opacity: 0.4 } }}
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: '#DCFCE7',
+                color: '#166534',
+                border: '1px solid #86EFAC',
+                borderRadius: '50%',
+                '&:hover': { bgcolor: '#BBF7D0' },
+                '&.Mui-disabled': { opacity: 0.4, bgcolor: '#DCFCE7', color: '#166534', border: '1px solid #86EFAC' },
+              }}
             >
-              <CheckIcon fontSize="small" />
+              <CheckIcon sx={{ fontSize: 16 }} />
             </IconButton>
             <IconButton
               size="small"
               aria-label="Cancel log entry"
               onClick={onCancel}
               disabled={saving}
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: '#FEE2E2',
+                color: '#991B1B',
+                border: '1px solid #FCA5A5',
+                borderRadius: '50%',
+                '&:hover': { bgcolor: '#FECACA' },
+              }}
             >
-              <CloseIcon fontSize="small" />
+              <CloseIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Box>
         </TableCell>

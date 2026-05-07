@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useState } from 'react'
+import { format, parseISO } from 'date-fns'
 import {
   Alert,
   Box,
@@ -151,9 +152,25 @@ export default function EmployeeList(): React.JSX.Element {
       </Box>
 
       {employees.length === 0 ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8, gap: 2 }}>
-          <Typography color="text.secondary">
-            No employees yet — add your first one to get started
+        <Box
+          sx={{
+            bgcolor: 'white',
+            border: '1.5px dashed #E5E7EB',
+            borderRadius: '8px',
+            p: '56px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 1,
+            mt: 2,
+          }}
+        >
+          <Typography sx={{ fontSize: '32px', lineHeight: 1 }}>👥</Typography>
+          <Typography sx={{ fontSize: '15px', fontWeight: 500, color: '#6B7280', mt: 1 }}>
+            No employees yet
+          </Typography>
+          <Typography sx={{ fontSize: '13px', color: '#9CA3AF', textAlign: 'center' }}>
+            Click "+ Add Employee" above to add your first team member.
           </Typography>
         </Box>
       ) : (
@@ -163,7 +180,9 @@ export default function EmployeeList(): React.JSX.Element {
               <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>
-                  <TableCell>Level</TableCell>
+                  <TableCell sx={{ width: 80 }}>Level</TableCell>
+                  <TableCell sx={{ width: 160 }}>Last Entry</TableCell>
+                  <TableCell sx={{ width: 120 }}>Log Entries</TableCell>
                   <TableCell sx={{ width: 120 }} />
                 </TableRow>
               </TableHead>
@@ -196,6 +215,8 @@ export default function EmployeeList(): React.JSX.Element {
                             </Select>
                           </FormControl>
                         </TableCell>
+                        <TableCell />
+                        <TableCell />
                         <TableCell>
                           <IconButton
                             aria-label="Save edit"
@@ -217,7 +238,7 @@ export default function EmployeeList(): React.JSX.Element {
                       </TableRow>
                       {error && (
                         <TableRow>
-                          <TableCell colSpan={3} sx={{ pt: 0, pb: 0.5 }}>
+                          <TableCell colSpan={5} sx={{ pt: 0, pb: 0.5 }}>
                             <Alert severity="error" sx={{ py: 0 }}>{error}</Alert>
                           </TableCell>
                         </TableRow>
@@ -226,17 +247,12 @@ export default function EmployeeList(): React.JSX.Element {
                   ) : (
                     <TableRow
                       key={emp.id}
+                      onClick={() => setEmployee(emp)}
                       onMouseEnter={() => setHoveredId(emp.id)}
                       onMouseLeave={() => setHoveredId(null)}
+                      sx={{ cursor: 'pointer' }}
                     >
-                      <TableCell
-                        sx={{
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          '&:hover': { color: 'primary.main' },
-                        }}
-                        onClick={() => setEmployee(emp)}
-                      >
+                      <TableCell sx={{ fontWeight: 500 }}>
                         {emp.name}
                       </TableCell>
                       <TableCell>
@@ -258,20 +274,30 @@ export default function EmployeeList(): React.JSX.Element {
                           {emp.level}
                         </Box>
                       </TableCell>
+                      <TableCell sx={{ color: 'text.secondary', fontSize: '13px' }}>
+                        {emp.lastEntryDate
+                          ? format(parseISO(emp.lastEntryDate), 'MMM d, yyyy')
+                          : '—'}
+                      </TableCell>
+                      <TableCell sx={{ color: 'text.secondary', fontSize: '13px' }}>
+                        {emp.entryCount != null && emp.entryCount > 0
+                          ? `${emp.entryCount} entries`
+                          : '—'}
+                      </TableCell>
                       <TableCell>
                         {hoveredId === emp.id && (
                           <>
                             <IconButton
                               aria-label="Edit employee"
                               size="medium"
-                              onClick={() => handleEditOpen(emp)}
+                              onClick={(e) => { e.stopPropagation(); handleEditOpen(emp) }}
                             >
                               <EditIcon fontSize="small" />
                             </IconButton>
                             <IconButton
                               aria-label="Delete employee"
                               size="medium"
-                              onClick={() => { if (editingId === null) setDeleteConfirmId(emp.id) }}
+                              onClick={(e) => { e.stopPropagation(); if (editingId === null) setDeleteConfirmId(emp.id) }}
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>

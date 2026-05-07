@@ -6,6 +6,8 @@ interface EmployeeRow {
   name: string
   level: string
   created_at: string
+  entry_count?: number
+  last_entry_date?: string | null
 }
 
 function mapToEmployee(row: EmployeeRow): Employee {
@@ -14,12 +16,21 @@ function mapToEmployee(row: EmployeeRow): Employee {
     name: row.name,
     level: row.level as CompetencyLevel,
     createdAt: row.created_at,
+    entryCount: row.entry_count,
+    lastEntryDate: row.last_entry_date ?? null,
   }
 }
 
 export function listEmployees(db: Database.Database): Employee[] {
-  return (db.prepare('SELECT id, name, level, created_at FROM employees ORDER BY created_at DESC').all() as EmployeeRow[])
-    .map(mapToEmployee)
+  return (db.prepare(`
+    SELECT e.id, e.name, e.level, e.created_at,
+           COUNT(ble.id) AS entry_count,
+           MAX(ble.entry_date) AS last_entry_date
+    FROM employees e
+    LEFT JOIN behavior_log_entries ble ON ble.employee_id = e.id
+    GROUP BY e.id
+    ORDER BY e.created_at DESC
+  `).all() as EmployeeRow[]).map(mapToEmployee)
 }
 
 export function createEmployee(db: Database.Database, name: string, level: CompetencyLevel): Employee {
