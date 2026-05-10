@@ -14,6 +14,13 @@ export function getExpectedBehavior(competencyId: number, level: CompetencyLevel
   return row?.description ?? null
 }
 
+export function getAllExpectedBehaviors(competencyId: number): Record<CompetencyLevel, string> {
+  const levels: CompetencyLevel[] = ['A', 'B', 'C', 'D']
+  return Object.fromEntries(
+    levels.map((level) => [level, getExpectedBehavior(competencyId, level) ?? ''])
+  ) as Record<CompetencyLevel, string>
+}
+
 export function setExpectedBehavior(
   competencyId: number,
   level: CompetencyLevel,

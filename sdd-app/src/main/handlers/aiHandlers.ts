@@ -3,7 +3,7 @@ import log from 'electron-log/main'
 import type { AIProvider } from '../ai/AIProvider'
 import { db } from '../db/database'
 import { listEntries } from '../db/behaviorLog'
-import { getExpectedBehavior } from '../db/framework'
+import { getAllExpectedBehaviors } from '../db/framework'
 import { getModel } from '../settings/modelPreference'
 import type { IpcResult, EvaluateResult, EvaluatePayload, CompetencyLevel } from '../../shared/ipc-types'
 
@@ -19,7 +19,15 @@ export function registerAiHandlers(aiProvider: AIProvider): void {
         if (!empRow) return { ok: false, error: 'Employee not found.' }
 
         const entries = listEntries(db!, payload.employeeId, payload.competencyId)
-        const expectedBehaviors = getExpectedBehavior(payload.competencyId, empRow.level) ?? ''
+        const allExpectedBehaviors = getAllExpectedBehaviors(payload.competencyId)
+        const unconfigured = (['A', 'B', 'C', 'D'] as const).filter((l) => !allExpectedBehaviors[l].trim())
+        if (unconfigured.length > 0) {
+          return {
+            ok: false,
+            error: `Expected behaviors not configured for level(s): ${unconfigured.join(', ')}. Please configure all levels in the Competency Framework before evaluating.`
+          }
+        }
+
         const model = getModel(db!)
 
         let timeoutHandle: ReturnType<typeof setTimeout>
@@ -31,7 +39,7 @@ export function registerAiHandlers(aiProvider: AIProvider): void {
         })
 
         const result = await Promise.race([
-          aiProvider.evaluate({ entries, expectedBehaviors, model }),
+          aiProvider.evaluate({ entries, allExpectedBehaviors, employeeLevel: empRow.level, model }),
           timeoutPromise
         ]).finally(() => clearTimeout(timeoutHandle))
 

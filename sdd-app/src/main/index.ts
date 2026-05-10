@@ -5,15 +5,15 @@ import icon from '../../resources/icon.png?asset'
 import log from 'electron-log/main'
 import { initializeSchema, db } from './db/database'
 import type { AIProvider } from './ai/AIProvider'
-import { MockAIProvider } from './ai/MockAIProvider'
+import { ClaudeAIProvider } from './ai/ClaudeAIProvider'
 import { registerEmployeeHandlers } from './handlers/employeeHandlers'
 import { registerBehaviorLogHandlers } from './handlers/behaviorLogHandlers'
 import { registerFrameworkHandlers } from './handlers/frameworkHandlers'
 import { registerAiHandlers } from './handlers/aiHandlers'
 import { registerSettingsHandlers } from './handlers/settingsHandlers'
 
-// Swap MockAIProvider → ClaudeAIProvider here at Story 6.5 integration time — no other files change
-const aiProvider: AIProvider = new MockAIProvider()
+// ClaudeAIProvider wired in Story 6.6
+const aiProvider: AIProvider = new ClaudeAIProvider()
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({

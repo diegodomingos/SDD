@@ -1,9 +1,10 @@
-import type { Grade, BehaviorLogEntry } from '../../shared/ipc-types'
+import type { Grade, BehaviorLogEntry, CompetencyLevel } from '../../shared/ipc-types'
 
 export interface EvaluationInput {
-  entries: BehaviorLogEntry[]  // behavior log entries filtered to one competency
-  expectedBehaviors: string    // configured expected behavior text for this competency + level
-  model: string                // 'claude-haiku-4-5-20251001' | 'claude-sonnet-4-6'
+  entries: BehaviorLogEntry[]
+  allExpectedBehaviors: Record<CompetencyLevel, string>  // behaviors for levels A, B, C, D
+  employeeLevel: CompetencyLevel                          // employee's current level
+  model: string                                          // 'claude-haiku-4-5-20251001' | 'claude-sonnet-4-6'
 }
 
 export interface EvaluationResult {

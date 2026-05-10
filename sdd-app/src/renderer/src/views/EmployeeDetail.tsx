@@ -180,7 +180,7 @@ export default function EmployeeDetail(): React.JSX.Element {
                 variant="contained"
                 sx={{ ml: 2, whiteSpace: 'nowrap' }}
                 onClick={() => evaluate(employee.id, selectedCompetency.id)}
-                disabled={isEvaluating}
+                disabled={isEvaluating || isLoading || entries.length === 0}
               >
                 Run Evaluation
               </Button>

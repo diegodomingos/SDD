@@ -221,3 +221,14 @@
 - Chip colors hardcoded as strings in `CHIP_COLORS` — unknown/renamed competency silently renders in neutral gray; intentional per dev notes; address if competency names become configurable (`sdd-app/src/renderer/src/components/common/CompetencyChip.tsx`)
 - `createEmployee`/`updateEmployee` return `entryCount: undefined` — aggregation columns not included in create/update SELECT query; UI reloads via `listEmployees` after mutation so the inconsistent snapshot is never displayed (`sdd-app/src/main/db/employees.ts`)
 - `listEmployees` always pays LEFT JOIN + GROUP BY cost — every render of the employee list re-aggregates; acceptable for PoC scale; revisit if the employee or log count grows substantially (`sdd-app/src/main/db/employees.ts`)
+
+## Deferred from: code review of 6-6-real-claude-api-integration (2026-05-10)
+
+- `getAllExpectedBehaviors` null→'' coercion loses null/empty distinction — `?? ''` silently converts null (not configured) to empty string; the handler's falsy check catches it but the abstraction boundary is fragile (`sdd-app/src/main/db/framework.ts`)
+- `listEntries` and `getAllExpectedBehaviors` called when `db` is null — pre-existing `db!` pattern; caught by outer try/catch in `aiHandlers.ts` with a generic error message (`sdd-app/src/main/handlers/aiHandlers.ts`)
+- `listEntries` called before behavior config validation — performance only; on misconfigured competency the entries query runs unnecessarily before the guard short-circuits (`sdd-app/src/main/handlers/aiHandlers.ts`)
+- `buildPrompt` prompt injection via raw entry `description` — trusted-user desktop app design decision; user-supplied strings injected verbatim; AI output validated via `VALID_GRADES`, limiting exploit impact (`sdd-app/src/main/ai/ClaudeAIProvider.ts`)
+- Entries with empty/whitespace-only `description` silently included in prompt — pre-existing data quality concern; handler validates `entries.length > 0` but not individual entry content (`sdd-app/src/main/ai/ClaudeAIProvider.ts`)
+- Competency switch does not clear `entries` before new fetch completes — pre-existing UX pattern; stale entries briefly visible; related to deferred items from Stories 6.1 and 4.1 (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
+- `timeoutHandle` potentially uninitialized per TypeScript strict mode — pre-existing code not changed in this story; runtime assignment order is safe; compile-time concern only (`sdd-app/src/main/handlers/aiHandlers.ts`)
+- Test mock binds `messages` as instance property on anonymous class — low severity fragility; `mockCreate` shared via closure so assertions work; diverges from real SDK's prototype structure (`sdd-app/__tests__/main/ai/ClaudeAIProvider.test.ts`)
