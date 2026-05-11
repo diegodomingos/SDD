@@ -222,6 +222,13 @@
 - `createEmployee`/`updateEmployee` return `entryCount: undefined` — aggregation columns not included in create/update SELECT query; UI reloads via `listEmployees` after mutation so the inconsistent snapshot is never displayed (`sdd-app/src/main/db/employees.ts`)
 - `listEmployees` always pays LEFT JOIN + GROUP BY cost — every render of the employee list re-aggregates; acceptable for PoC scale; revisit if the employee or log count grows substantially (`sdd-app/src/main/db/employees.ts`)
 
+## Deferred from: code review of 6-7-testing-accessibility-and-packaging (2026-05-10)
+
+- `wrap()` helper in `GradeResultCard.test.tsx` creates fresh `vi.fn()` mocks on each call — latent trap; tests without a named mock ref cannot assert callback invocations (`sdd-app/__tests__/renderer/components/GradeResultCard.test.tsx`)
+- Positional argument API in `InsufficientInputCard` `wrap` helper — adding a prop requires updating all positional call sites; consider options-object pattern in a future test refactor (`sdd-app/__tests__/renderer/components/InsufficientInputCard.test.tsx`)
+- `entryCount: 0` boundary case not covered — "Based on 0 observations" output untested; not required by spec (`sdd-app/__tests__/renderer/components/GradeResultCard.test.tsx`)
+- `GRADE_STYLES` lookup has no fallback for unknown grade — accessing `.bg`/`.color`/`.border` on `undefined` crashes if AI returns an unrecognized grade; add `?? GRADE_STYLES['Meets Expectations']` fallback if `Grade` type gains a new variant (`sdd-app/src/renderer/src/components/evaluation/GradeResultCard.tsx`)
+
 ## Deferred from: code review of 6-6-real-claude-api-integration (2026-05-10)
 
 - `getAllExpectedBehaviors` null→'' coercion loses null/empty distinction — `?? ''` silently converts null (not configured) to empty string; the handler's falsy check catches it but the abstraction boundary is fragile (`sdd-app/src/main/db/framework.ts`)

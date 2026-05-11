@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-05-10 # story 6-6 real-claude-api-integration done; code review complete
+last_updated: 2026-05-10 # story 6-7 code review complete, all patches applied
 project: SDD
 project_key: NOKEY
 tracking_system: file-system
@@ -90,5 +90,5 @@ development_status:
   6-4-ai-error-handling-and-network-resilience: done
   6-5-ux-fidelity-fix: done
   6-6-real-claude-api-integration: done
-  6-7-testing-accessibility-and-packaging: backlog
+  6-7-testing-accessibility-and-packaging: done
   epic-6-retrospective: optional

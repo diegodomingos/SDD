@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: sdd-app
+appId: com.sdd.employeeevaluation
+productName: Employee Evaluation Tool
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: sdd-app
+  executableName: Employee Evaluation Tool
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -33,10 +33,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: SDD
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
-publish:
-  provider: generic
-  url: https://example.com/auto-updates

@@ -4,7 +4,13 @@ import type { EvaluationInput } from '../../../src/main/ai/AIProvider'
 
 const sampleInput: EvaluationInput = {
   entries: [],
-  expectedBehaviors: 'Shows clear communication in meetings.',
+  allExpectedBehaviors: {
+    A: 'Shows clear communication in meetings.',
+    B: 'Shows clear communication in meetings.',
+    C: 'Shows clear communication in meetings.',
+    D: 'Shows clear communication in meetings.',
+  },
+  employeeLevel: 'B',
   model: 'claude-haiku-4-5-20251001'
 }
 
