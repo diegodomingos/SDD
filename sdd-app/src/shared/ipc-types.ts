@@ -32,8 +32,8 @@ export interface BehaviorLogEntry {
   id: number
   employeeId: number
   description: string
-  entryDate: string    // ISO 8601 date string e.g. '2026-04-25'
-  createdAt: string    // ISO 8601 datetime string
+  entryDate: string // ISO 8601 date string e.g. '2026-04-25'
+  createdAt: string // ISO 8601 datetime string
   competencies: Competency[]
 }
 
@@ -105,6 +105,22 @@ export interface EvaluatePayload {
 }
 
 // settings:*
+export interface BackupPayload {
+  version: 1
+  exportedAt: string
+  employees: Array<{ id: number; name: string; level: string; createdAt: string }>
+  expectedBehaviors: Array<{ competencyId: number; level: string; description: string }>
+  behaviorLogEntries: Array<{
+    id: number
+    employeeId: number
+    description: string
+    entryDate: string
+    createdAt: string
+  }>
+  behaviorLogEntryCompetencies: Array<{ entryId: number; competencyId: number }>
+  settings: Record<string, string>
+}
+
 export interface SetApiKeyPayload {
   key: string
 }

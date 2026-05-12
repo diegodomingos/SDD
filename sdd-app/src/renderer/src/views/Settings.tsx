@@ -1,22 +1,39 @@
 import { useEffect, useState } from 'react'
 import {
-  Box, Button, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle, IconButton, InputAdornment, MenuItem,
-  Select, TextField, Typography,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
 } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { useSettings } from '../hooks/useSettings'
 import { useAppStore } from '../store/appStore'
 
-function SectionHeader({ label, danger = false }: { label: string; danger?: boolean }): React.JSX.Element {
+function SectionHeader({
+  label,
+  danger = false
+}: {
+  label: string
+  danger?: boolean
+}): React.JSX.Element {
   return (
     <Box
       sx={{
         px: '20px',
         py: '14px',
         bgcolor: danger ? '#FFF5F5' : '#F9FAFB',
-        borderBottom: `1px solid ${danger ? '#FCA5A5' : '#E5E7EB'}`,
+        borderBottom: `1px solid ${danger ? '#FCA5A5' : '#E5E7EB'}`
       }}
     >
       <Typography
@@ -25,7 +42,7 @@ function SectionHeader({ label, danger = false }: { label: string; danger?: bool
           fontWeight: 600,
           color: danger ? '#991B1B' : '#374151',
           textTransform: 'uppercase',
-          letterSpacing: '0.6px',
+          letterSpacing: '0.6px'
         }}
       >
         {label}
@@ -36,12 +53,39 @@ function SectionHeader({ label, danger = false }: { label: string; danger?: bool
 
 export default function Settings(): React.JSX.Element {
   const {
-    draftName, setDraftName, isLoading, isSaving, nameError, keyError, modelError, load, saveManagerName,
-    isKeyConfigured, draftApiKey, setDraftApiKey, isSavingKey, saveApiKey,
-    draftModel, setDraftModel, isSavingModel, saveModel,
-    isClearingData, clearDataError, clearAllData: clearAllDataFn, resetClearError,
+    draftName,
+    setDraftName,
+    isLoading,
+    isSaving,
+    nameError,
+    keyError,
+    modelError,
+    load,
+    saveManagerName,
+    isKeyConfigured,
+    draftApiKey,
+    setDraftApiKey,
+    isSavingKey,
+    saveApiKey,
+    draftModel,
+    setDraftModel,
+    isSavingModel,
+    saveModel,
+    isClearingData,
+    clearDataError,
+    clearAllData: clearAllDataFn,
+    resetClearError,
+    isExporting,
+    exportError,
+    exportSuccess,
+    exportData,
+    isImporting,
+    importError,
+    importSuccess,
+    importData
   } = useSettings()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [importConfirmOpen, setImportConfirmOpen] = useState(false)
   const [showApiKey, setShowApiKey] = useState(false)
   const storedName = useAppStore((s) => s.managerName)
   const storedModel = useAppStore((s) => s.aiModel)
@@ -53,21 +97,30 @@ export default function Settings(): React.JSX.Element {
   const isDirty = draftName.trim() !== storedName
   const canSave = isDirty && !isSaving
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<void> => {
     await saveManagerName(draftName.trim())
   }
 
-  const handleSaveKey = async () => {
+  const handleSaveKey = async (): Promise<void> => {
     await saveApiKey(draftApiKey.trim())
   }
 
-  const handleSaveModel = async () => {
+  const handleSaveModel = async (): Promise<void> => {
     await saveModel(draftModel)
   }
 
-  const handleClearConfirm = async () => {
+  const handleClearConfirm = async (): Promise<void> => {
     const ok = await clearAllDataFn()
     if (ok) setConfirmOpen(false)
+  }
+
+  const handleExport = async (): Promise<void> => {
+    await exportData()
+  }
+
+  const handleImportConfirm = async (): Promise<void> => {
+    await importData()
+    setImportConfirmOpen(false)
   }
 
   return (
@@ -83,7 +136,7 @@ export default function Settings(): React.JSX.Element {
             border: '1px solid',
             borderColor: 'divider',
             borderRadius: 1,
-            overflow: 'hidden',
+            overflow: 'hidden'
           }}
         >
           <SectionHeader label="General" />
@@ -128,7 +181,7 @@ export default function Settings(): React.JSX.Element {
             border: '1px solid',
             borderColor: 'divider',
             borderRadius: 1,
-            overflow: 'hidden',
+            overflow: 'hidden'
           }}
         >
           <SectionHeader label="AI Configuration" />
@@ -155,11 +208,15 @@ export default function Settings(): React.JSX.Element {
                           onClick={() => setShowApiKey((v) => !v)}
                           edge="end"
                         >
-                          {showApiKey ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                          {showApiKey ? (
+                            <VisibilityOffIcon fontSize="small" />
+                          ) : (
+                            <VisibilityIcon fontSize="small" />
+                          )}
                         </IconButton>
                       </InputAdornment>
-                    ),
-                  },
+                    )
+                  }
                 }}
               />
               <Button
@@ -175,8 +232,13 @@ export default function Settings(): React.JSX.Element {
               {isKeyConfigured ? '✓ API key is configured' : 'No API key configured'}
             </Typography>
             <Typography sx={{ fontSize: '12px' }}>
-              <Box component="span" sx={{ color: '#059669', fontWeight: 500 }}>🔒 Stored securely</Box>
-              <Box component="span" sx={{ color: '#9CA3AF' }}> · Encrypted by your OS credential store</Box>
+              <Box component="span" sx={{ color: '#059669', fontWeight: 500 }}>
+                🔒 Stored securely
+              </Box>
+              <Box component="span" sx={{ color: '#9CA3AF' }}>
+                {' '}
+                · Encrypted by your OS credential store
+              </Box>
             </Typography>
             {keyError && (
               <Typography color="error" sx={{ fontSize: '13px', mt: 1 }}>
@@ -220,6 +282,79 @@ export default function Settings(): React.JSX.Element {
           </Box>
         </Box>
 
+        {/* DATA BACKUP */}
+        <Box
+          sx={{
+            mb: 3,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            overflow: 'hidden'
+          }}
+        >
+          <SectionHeader label="Data Backup" />
+          <Box sx={{ p: 2.5 }}>
+            {/* Export */}
+            <Box sx={{ mb: 2 }}>
+              <Typography sx={{ fontSize: '14px', fontWeight: 600, mb: 1 }}>Export Data</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography sx={{ fontSize: '13px', color: 'text.secondary', flex: 1 }}>
+                  Save all app data to a JSON backup file.
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onClick={handleExport}
+                  disabled={isExporting}
+                >
+                  {isExporting ? 'Exporting…' : 'Export backup'}
+                </Button>
+              </Box>
+              {exportSuccess && (
+                <Typography sx={{ fontSize: '12px', color: '#059669', mt: 0.75 }}>
+                  Backup exported successfully.
+                </Typography>
+              )}
+              {exportError && (
+                <Typography color="error" sx={{ fontSize: '13px', mt: 1 }}>
+                  {exportError}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Import */}
+            <Box>
+              <Typography sx={{ fontSize: '14px', fontWeight: 600, mb: 1 }}>Import Data</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography sx={{ fontSize: '13px', color: 'text.secondary', flex: 1 }}>
+                  Restore data from a backup file. This will overwrite all current data.
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onClick={() => setImportConfirmOpen(true)}
+                  disabled={isImporting}
+                >
+                  {isImporting ? 'Importing…' : 'Import backup'}
+                </Button>
+              </Box>
+              {importSuccess && (
+                <Typography sx={{ fontSize: '12px', color: '#059669', mt: 0.75 }}>
+                  Data restored successfully.
+                </Typography>
+              )}
+              {importError && (
+                <Typography color="error" sx={{ fontSize: '13px', mt: 1 }}>
+                  {importError}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </Box>
+
         {/* DATA MANAGEMENT */}
         <Box
           sx={{
@@ -227,22 +362,25 @@ export default function Settings(): React.JSX.Element {
             bgcolor: 'background.paper',
             border: '1px solid #FCA5A5',
             borderRadius: 1,
-            overflow: 'hidden',
+            overflow: 'hidden'
           }}
         >
           <SectionHeader label="Data Management" danger />
           <Box sx={{ p: 2.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography sx={{ fontSize: '13px', color: 'text.secondary', flex: 1 }}>
-                Permanently delete all employees, behavior log entries, and expected behaviors.
-                This cannot be undone.
+                Permanently delete all employees, behavior log entries, and expected behaviors. This
+                cannot be undone.
               </Typography>
               <Button
                 variant="outlined"
                 color="error"
                 size="small"
                 sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
-                onClick={() => { resetClearError(); setConfirmOpen(true) }}
+                onClick={() => {
+                  resetClearError()
+                  setConfirmOpen(true)
+                }}
                 disabled={isClearingData}
               >
                 {isClearingData ? 'Clearing…' : 'Clear all data'}
@@ -257,12 +395,30 @@ export default function Settings(): React.JSX.Element {
         </Box>
       </Box>
 
+      <Dialog
+        open={importConfirmOpen}
+        onClose={isImporting ? undefined : () => setImportConfirmOpen(false)}
+      >
+        <DialogTitle>Import backup?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            All current data will be replaced by the backup. This cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setImportConfirmOpen(false)}>Cancel</Button>
+          <Button onClick={handleImportConfirm} disabled={isImporting}>
+            Import
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog open={confirmOpen} onClose={isClearingData ? undefined : () => setConfirmOpen(false)}>
         <DialogTitle>Clear all data?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            All employees, behavior log entries, and expected behaviors will be permanently
-            deleted. This cannot be undone.
+            All employees, behavior log entries, and expected behaviors will be permanently deleted.
+            This cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

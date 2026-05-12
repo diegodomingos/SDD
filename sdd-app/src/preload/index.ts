@@ -20,6 +20,8 @@ const ALLOWED_CHANNELS = new Set([
   'settings:get-manager-name',
   'settings:set-manager-name',
   'settings:clear-all-data',
+  'settings:export-data',
+  'settings:import-data'
 ])
 
 contextBridge.exposeInMainWorld('electronAPI', {

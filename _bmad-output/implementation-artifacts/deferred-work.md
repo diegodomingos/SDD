@@ -239,3 +239,10 @@
 - Competency switch does not clear `entries` before new fetch completes — pre-existing UX pattern; stale entries briefly visible; related to deferred items from Stories 6.1 and 4.1 (`sdd-app/src/renderer/src/views/EmployeeDetail.tsx`)
 - `timeoutHandle` potentially uninitialized per TypeScript strict mode — pre-existing code not changed in this story; runtime assignment order is safe; compile-time concern only (`sdd-app/src/main/handlers/aiHandlers.ts`)
 - Test mock binds `messages` as instance property on anonymous class — low severity fragility; `mockCreate` shared via closure so assertions work; diverges from real SDK's prototype structure (`sdd-app/__tests__/main/ai/ClaudeAIProvider.test.ts`)
+
+## Deferred from: data-backup-export-import review (2026-05-11)
+
+- `sdd-app/src/main/handlers/settingsHandlers.ts` (import handler) — no file-size cap before readFileSync; very large files read entirely into memory. Low risk on a local desktop app but worth a limit before production distribution.
+- `sdd-app/src/main/handlers/settingsHandlers.ts` (export handler) — writeFileSync is not atomic; disk-full mid-write can leave destination file partially corrupt. Consider temp-file-then-rename pattern for robustness.
+- `sdd-app/src/main/handlers/settingsHandlers.ts` (import handler) — reading a directory path (Linux/some Electron versions) returns misleading "Invalid backup file." error. Could detect EISDIR and return a clearer message.
+- `sdd-app/src/main/db/backup.ts` vs `sdd-app/src/main/db/clearAllData.ts` — inconsistent deletion patterns (backup.ts explicitly deletes behavior_log_entries; clearAllData.ts relies on CASCADE from employees). Not a bug, but a future developer reading clearAllData.ts as template may introduce subtle differences.

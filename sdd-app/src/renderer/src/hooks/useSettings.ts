@@ -1,7 +1,38 @@
 import { useState, useCallback } from 'react'
 import { useAppStore } from '../store/appStore'
 
-export function useSettings() {
+export function useSettings(): {
+  draftName: string
+  setDraftName: (v: string) => void
+  isLoading: boolean
+  isSaving: boolean
+  nameError: string | null
+  keyError: string | null
+  modelError: string | null
+  load: () => Promise<void>
+  saveManagerName: (name: string) => Promise<boolean>
+  isKeyConfigured: boolean
+  draftApiKey: string
+  setDraftApiKey: (v: string) => void
+  isSavingKey: boolean
+  saveApiKey: (key: string) => Promise<boolean>
+  draftModel: string
+  setDraftModel: (v: string) => void
+  isSavingModel: boolean
+  saveModel: (model: string) => Promise<boolean>
+  isClearingData: boolean
+  clearDataError: string | null
+  clearAllData: () => Promise<boolean>
+  resetClearError: () => void
+  isExporting: boolean
+  exportError: string | null
+  exportSuccess: boolean
+  exportData: () => Promise<'saved' | 'cancelled' | null>
+  isImporting: boolean
+  importError: string | null
+  importSuccess: boolean
+  importData: () => Promise<'imported' | 'cancelled' | null>
+} {
   const [draftName, setDraftName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -19,6 +50,14 @@ export function useSettings() {
   const [isClearingData, setIsClearingData] = useState(false)
   const [clearDataError, setClearDataError] = useState<string | null>(null)
 
+  const [isExporting, setIsExporting] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
+  const [exportSuccess, setExportSuccess] = useState(false)
+
+  const [isImporting, setIsImporting] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importSuccess, setImportSuccess] = useState(false)
+
   const setStoreKeyConfigured = useAppStore((s) => s.setKeyConfigured)
   const setStoreAiModel = useAppStore((s) => s.setAiModel)
   const resetUserData = useAppStore((s) => s.resetUserData)
@@ -32,7 +71,7 @@ export function useSettings() {
       const [nameResult, keyResult, modelResult] = await Promise.all([
         window.electronAPI.invoke<string>('settings:get-manager-name'),
         window.electronAPI.invoke<boolean>('settings:get-key-configured'),
-        window.electronAPI.invoke<string>('settings:get-model'),
+        window.electronAPI.invoke<string>('settings:get-model')
       ])
       if (nameResult.ok) {
         setDraftName(nameResult.data)
@@ -129,6 +168,55 @@ export function useSettings() {
     [setStoreAiModel]
   )
 
+  const exportData = useCallback(async (): Promise<'saved' | 'cancelled' | null> => {
+    setIsExporting(true)
+    setExportError(null)
+    setExportSuccess(false)
+    setImportSuccess(false)
+    try {
+      const result = await window.electronAPI.invoke<'saved' | 'cancelled'>('settings:export-data')
+      if (result.ok) {
+        if (result.data === 'saved') setExportSuccess(true)
+        return result.data
+      } else {
+        setExportError(result.error)
+        return null
+      }
+    } catch {
+      setExportError('Unexpected error exporting data.')
+      return null
+    } finally {
+      setIsExporting(false)
+    }
+  }, [])
+
+  const importData = useCallback(async (): Promise<'imported' | 'cancelled' | null> => {
+    setIsImporting(true)
+    setImportError(null)
+    setImportSuccess(false)
+    setExportSuccess(false)
+    try {
+      const result = await window.electronAPI.invoke<'imported' | 'cancelled'>(
+        'settings:import-data'
+      )
+      if (result.ok) {
+        if (result.data === 'imported') {
+          setImportSuccess(true)
+          await load()
+        }
+        return result.data
+      } else {
+        setImportError(result.error)
+        return null
+      }
+    } catch {
+      setImportError('Unexpected error importing data.')
+      return null
+    } finally {
+      setIsImporting(false)
+    }
+  }, [load])
+
   const clearAllData = useCallback(async (): Promise<boolean> => {
     setIsClearingData(true)
     setClearDataError(null)
@@ -149,10 +237,35 @@ export function useSettings() {
   }, [resetUserData])
 
   return {
-    draftName, setDraftName, isLoading, isSaving, nameError, keyError, modelError, load, saveManagerName,
-    isKeyConfigured, draftApiKey, setDraftApiKey, isSavingKey, saveApiKey,
-    draftModel, setDraftModel, isSavingModel, saveModel,
-    isClearingData, clearDataError, clearAllData,
+    draftName,
+    setDraftName,
+    isLoading,
+    isSaving,
+    nameError,
+    keyError,
+    modelError,
+    load,
+    saveManagerName,
+    isKeyConfigured,
+    draftApiKey,
+    setDraftApiKey,
+    isSavingKey,
+    saveApiKey,
+    draftModel,
+    setDraftModel,
+    isSavingModel,
+    saveModel,
+    isClearingData,
+    clearDataError,
+    clearAllData,
     resetClearError: () => setClearDataError(null),
+    isExporting,
+    exportError,
+    exportSuccess,
+    exportData,
+    isImporting,
+    importError,
+    importSuccess,
+    importData
   }
 }
